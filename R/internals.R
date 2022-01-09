@@ -36,3 +36,10 @@ round_df <- function(x, digits) {
   x[numeric_columns] <-  round(x[numeric_columns], digits)
   x
 }
+# create_list
+create_list = function(a, b) {
+  l = list(a=a, b=b)
+  class(l) = "mylist"
+  l
+}
+

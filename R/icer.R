@@ -27,13 +27,13 @@ cea <- function(cost, effect, group, ref, data, na.omit = TRUE) {
 # warning : must have only two levels !
 
 
-# warging if groups have the same length !
+# warning if groups have the same length !
 
 
 # split data by group
+
 group_ctrl <- data[data$group == ref, ]
 group_trt <-  data[data$group != ref, ]
-
 
 # cost & effect observed mean and sd
 observ_c_mean <-  round(c(mean(group_ctrl$cost), mean(group_trt$cost)),4)  # c(mean(data[data$group == ref, ]$cost), mean(data[data$group != ref, ]$cost)
