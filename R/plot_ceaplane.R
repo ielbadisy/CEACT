@@ -3,9 +3,9 @@
 #================================
 k <- 500
 plot_ceplane <- function(data, k = 500, labels = NULL) {
+
   pdata <- data
   pdata$ib <- k * pdata[1] -  pdata[2]
-
   # X and y limits
   xlim <- ceiling(max(pdata[,2]) * 1.2)
   ylim <- max(pdata[,1]) * 1.2

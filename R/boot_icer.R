@@ -7,10 +7,20 @@ ref <- 'control'
 # bootstrap the ratio of :
 # Sepal.Length - Sepal.Width / Petal.Length - Petal.Width
 
-library(boot) # package for bootstrap
-ci.type = "bca"
 
+#' Title
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 summary.boot_icer <- function(x, ...){
+  library(boot) # package for bootstrap
+  ci.type = "bca"
+
   # check class
   return(x$estim_icer)
 }
