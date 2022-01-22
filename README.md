@@ -2,7 +2,7 @@
 
 ## Overview 
 
-CEACt (Cost-Effectiveness Analysis For Clinical Trials) produces an economic evaluation for two interventions (i.e. treatment and control group). 
+CEACt (Cost-Effectiveness Analysis For Clinical Trials) produces a cost-effectiveness analysis of two interventions (i.e. treatment and control group). 
 
 ## Installation
 
