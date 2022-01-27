@@ -8,7 +8,7 @@
 #' @param na.omit
 #'
 #' @return
-#' @export
+#' @export cea()
 #'
 #' @examples
 #' trt_grp <- data.frame(group = rep("treatment", 250), cost = rgamma(250, 1000), effect = runif(250, 1, 20))
@@ -16,6 +16,7 @@
 #' dce <- rbind(trt_grp, control_grp)
 #' ref <- "control"
 #' cea(dce, effect, cost, group, ref = ref)
+#'
 cea <- function(data, cost, effect, group, ref, na.omit = TRUE) {
 
   # TO DO later :

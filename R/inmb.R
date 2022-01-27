@@ -2,6 +2,8 @@
 d <- data.frame(c = runif(1000, 120, 2958), e = runif(1000, 120, 699))
 d <- as.data.table(d)
 #===========================
+
+
 ib <- wtp * d$e - d$c # incremental benefit
 ceac <- mean(ib>0) # probability of cost-effectiveness
 eib <- mean(ib) # expected incremental benefit
@@ -18,9 +20,10 @@ CEAC <- data.table()
 for (wtp in seq(0, max.wtp, steps)) {
   prob <- d[, mean((wtp * e - c) > 0)]
   CEAC <- rbind(CEAC, data.table(wtp, prob))
-}
-CEAC
 
+}
+
+CEAC
 
 plot_ceac <- function(data){
 pdata <- data

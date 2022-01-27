@@ -43,11 +43,4 @@ round_df <- function(x, digits) {
 
   x
 }
-# create_list
-create_list <- function(a, b) {
-  l <- list(a = a, b = b)
-  class(l) <- "mylist"
-  l
-}
 
-styler:::set_style_transformers()
