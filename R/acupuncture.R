@@ -35,7 +35,3 @@ acupuncture <- rbind(control, acupuncture)
 acupuncture$group <- as.factor(acupuncture$group)
 
 
-
-
-usethis::use_data(acupuncture)
-
