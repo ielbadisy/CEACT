@@ -1,7 +1,32 @@
-
-
-#================================
-#k <- 500
+#' Plot Cost-Effectiveness Plane
+#'
+#' Generates a cost-effectiveness plane plot using ggplot2. This plot visualizes
+#' incremental costs versus incremental effects, typically used in health
+#' economics to assess the cost-effectiveness of healthcare interventions.
+#' A budget line with a specified slope (k) is added to help identify interventions
+#' below a certain cost-effectiveness threshold.
+#'
+#' @param data A data frame containing at least two columns: the first column
+#'   for incremental effects and the second column for incremental costs. Additional
+#'   columns are ignored.
+#' @param k The slope of the budget line, representing the willingness-to-pay
+#'   threshold for an additional unit of effect. Default is 500.
+#' @param labels Optional vector of labels for the points plotted on the
+#'   cost-effectiveness plane. Default is NULL.
+#'
+#' @return A ggplot object representing the cost-effectiveness plane with
+#'   interventions plotted as points, a budget line (with slope k), and axes
+#'   for incremental effects and costs. This plot object can be further modified
+#'   or directly displayed using ggplot2 functions.
+#'
+#' @examples
+#' # Assuming `acupuncture` is a data frame with incremental effects in the first
+#' # column and incremental costs in the second column:
+#' plot <- plot_ceplane(acupuncture, k = 500)
+#' plot
+#'
+#' @import ggplot2
+#' @export
 plot_ceplane <- function(data, k = 500, labels = NULL) {
 
   pdata <- data
@@ -34,7 +59,3 @@ plot_ceplane <- function(data, k = 500, labels = NULL) {
   # Return
   return(p)
 }
-
-
-
-#plot_ceplane(acupuncture)
