@@ -58,8 +58,8 @@ cea <- function(formula, data, ref, na.omit = TRUE) {
     Delta = round(c(delta_c, delta_e), 3),
     CI = c(paste0("[", round(ci[1], 2), ";", round(ci[2], 2), "]"),
            paste0("[", round(ci[3], 2), ";", round(ci[4], 2), "]")),
-    p.value = round(c(t_cost$p.value, t_eff$p.value), 4)
-  )
+    p.value = format_pval(c(t_cost$p.value, t_eff$p.value))
+    )
 
   attr(out, "ICER") <- round(ICER, 3)
   return(out)
