@@ -60,5 +60,8 @@ boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
            paste0("[", round(ci_icer[1], 3), ";", round(ci_icer[2], 3), "]"))
   )
 
-  return(list(summary = summary_tbl, boot_dist = bt$t))
+res <- list(summary = summary_tbl, boot_dist = bt$t)
+class(res) <- "boot_icer"
+return(res)
+
 }
