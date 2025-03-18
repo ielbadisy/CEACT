@@ -63,4 +63,6 @@ cea <- function(formula, data, ref, na.omit = TRUE) {
 
   attr(out, "ICER") <- round(ICER, 3)
   return(out)
+  class(out) <- "cea"
+
 }

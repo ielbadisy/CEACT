@@ -1,37 +1,64 @@
 # -------------------------------
-# Bootstrap ICER Function
+# Bootstrap ICER Function (Formula Interface)
 # -------------------------------
-boot_icer <- function(data, cost, effect, group, ref, R = 1000, ci.type = "bca") {
-  require(boot)
-  
+#' Bootstrap ICER Estimation
+#'
+#' Performs non-parametric bootstrap estimation of the Incremental Cost-Effectiveness Ratio (ICER)
+#' and returns estimates, confidence intervals, and standard errors.
+#'
+#' @param formula A formula like `cost + effect ~ group`, where the left-hand side contains
+#' cost and effect variables, and the right-hand side is the grouping variable.
+#' @param data A data frame containing the variables in the formula.
+#' @param ref Character string specifying the reference (control) group label.
+#' @param R Number of bootstrap replicates. Default is 1000.
+#' @param ci.type Confidence interval type for `boot.ci`. Default is "bca".
+#'
+#' @return A list with summary table and bootstrap distribution.
+#'
+#' @examples
+#' data(acupuncture)
+#' boot_icer(cost + qaly ~ group, data = acupuncture, ref = "control", R = 500)
+#'
+#' @export
+boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
+  terms_obj <- terms(formula)
+  vars <- all.vars(terms_obj)
+  if (length(vars) < 3) stop("Formula must be of the form: cost + effect ~ group")
+
+  cost   <- vars[1]
+  effect <- vars[2]
+  group  <- vars[3]
+
   data <- data[, c(cost, effect, group)]
   colnames(data) <- c("cost", "effect", "group")
-  
+
+  require(boot)
+
   stat_func <- function(d, i) {
-    d <- d[i,]
+    d <- d[i, ]
     delta_cost <- mean(d$cost[d$group != ref]) - mean(d$cost[d$group == ref])
     delta_effect <- mean(d$effect[d$group != ref]) - mean(d$effect[d$group == ref])
     ICER <- delta_cost / delta_effect
     return(c(delta_cost, delta_effect, ICER))
   }
-  
+
   set.seed(1234)
   bt <- boot(data, stat_func, R = R)
-  
+
   ci_dc <- boot.ci(bt, type = ci.type, index = 1)$bca[4:5]
   ci_de <- boot.ci(bt, type = ci.type, index = 2)$bca[4:5]
   ci_icer <- boot.ci(bt, type = ci.type, index = 3)$bca[4:5]
-  
+
   summary_tbl <- data.frame(
     Metric = c("Delta Cost", "Delta Effect", "ICER"),
     Estimate = round(colMeans(bt$t), 3),
     Observed = round(bt$t0, 3),
     StdError = round(apply(bt$t, 2, sd), 3),
     Bias = round(colMeans(bt$t) - bt$t0, 3),
-    CI = c(paste0("[", round(ci_dc[1],3), ";", round(ci_dc[2],3), "]"),
-           paste0("[", round(ci_de[1],3), ";", round(ci_de[2],3), "]"),
-           paste0("[", round(ci_icer[1],3), ";", round(ci_icer[2],3), "]"))
+    CI = c(paste0("[", round(ci_dc[1], 3), ";", round(ci_dc[2], 3), "]"),
+           paste0("[", round(ci_de[1], 3), ";", round(ci_de[2], 3), "]"),
+           paste0("[", round(ci_icer[1], 3), ";", round(ci_icer[2], 3), "]"))
   )
-  
+
   return(list(summary = summary_tbl, boot_dist = bt$t))
 }
