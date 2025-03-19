@@ -1,0 +1,112 @@
+---
+title: "CEACT Package"
+output: github_document
+---
+
+
+# CEACT: Cost-Effectiveness Analysis for Clinical Trials
+
+## Overview
+
+**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is a tool designed to produce a cost-effectiveness analysis of two interventions, specifically comparing treatment and control groups in clinical trials. This package aims to assist researchers and analysts in making informed decisions based on the cost-effectiveness of different health interventions.
+
+**CEACT** provides a complete suite of functions for computing and visualizing:
+- Incremental Cost-Effectiveness Ratio (ICER),
+- Cost-effectiveness planes,
+- Cost-effectiveness acceptability curves (CEAC),
+- Net monetary benefit (NMB) metrics.
+
+---
+
+## Installation
+
+```{r}
+# install.packages("devtools")
+devtools::install_github("ielbadisy/CEACT")
+```
+
+---
+
+## Key Features
+
+- `cea()`: Estimate the ICER and provide summary statistics.
+- `boot_icer()`: Perform non-parametric bootstrapping of ICERs.
+- `plot_ceplane()`: Plot the cost-effectiveness plane.
+- `plot_ceac()`: Plot the cost-effectiveness acceptability curve.
+- `compute_nmb_ceac()`: Compute net monetary benefits (NMB) and CEAC tables.
+
+---
+
+## Example Usage
+
+```{r}
+# Load CEACT package
+library(CEACT)
+
+# Simulate example data from a clinical trial
+set.seed(123)
+control <- data.frame(
+  cost = rnorm(200, 500, 100),
+  effect = rnorm(200, 0.4, 0.05),
+  group = "control"
+)
+
+treatment <- data.frame(
+  cost = rnorm(200, 550, 100),
+  effect = rnorm(200, 0.3, 0.06),
+  group = "treatment"
+)
+
+data <- rbind(control, treatment)
+```
+
+```{r}
+# Run cost-effectiveness analysis
+res_cea <- cea(cost + effect ~ group, data = data, ref = "control")
+res_cea
+```
+
+```{r}
+# Bootstrap ICER distribution
+res_boot <- boot_icer(cost + effect ~ group, data = data, ref = "control", R = 300)
+res_boot$summary
+```
+
+```{r}
+# Plot Cost-Effectiveness Plane
+plot_ceplane(res_boot, k = 1000)
+```
+
+# Plot Cost-Effectiveness Acceptability Curve
+plot_ceac(res_boot, wtp_range = seq(0, 2000, 100))
+
+# Compute Net Monetary Benefit and CEAC Table
+nmb_table <- compute_nmb_ceac(
+  data = data.frame(c = res_boot$boot_dist[, 1], e = res_boot$boot_dist[, 2]),
+  wtp_range = seq(0, 2000, 100)
+)
+print(nmb_table)
+```
+
+---
+
+## Documentation
+
+You can access documentation for each function using:
+
+```r
+?cea
+?boot_icer
+?plot_ceplane
+?plot_ceac
+?compute_nmb_ceac
+```
+
+---
+
+## Feedback & contributions
+
+We welcome feedback and contributions.  
+Submit suggestions, feature requests, or report issues via [GitHub Issues](https://github.com/ielbadisy/CEACT/issues).
+
+---
