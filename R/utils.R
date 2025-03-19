@@ -8,7 +8,6 @@ round_df <- function(x, digits = 3) {
 }
 
 
-
 format_pval <- function(p, digits = 4) {
   ifelse(p < 0.001, "<0.001", round(p, digits))
 }
