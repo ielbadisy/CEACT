@@ -1,7 +1,7 @@
 # -------------------------------
-# Plot CEAC Curve (boot_icer output directly)
+# Plot Cost-Effectiveness Plane (boot_icer output directly)
 # -------------------------------
-plot_ceac <- function(boot_icer_result, wtp_range = seq(0, 100000, 1000)) {
+plot_ceplane <- function(boot_icer_result, k = 500, subtitle = NULL) {
   if (!"boot_dist" %in% names(boot_icer_result)) stop("Input must be result from boot_icer()")
 
   data <- data.frame(
@@ -9,18 +9,47 @@ plot_ceac <- function(boot_icer_result, wtp_range = seq(0, 100000, 1000)) {
     IncrementalEffect = boot_icer_result$boot_dist[, 2]
   )
 
-  ceac_data <- data.frame()
-  for (wtp in wtp_range) {
-    inb <- wtp * data$IncrementalEffect - data$IncrementalCost
-    prob_ce <- mean(inb > 0)
-    ceac_data <- rbind(ceac_data, data.frame(WTP = wtp, Prob_CE = prob_ce))
-  }
-  ggplot2::ggplot(ceac_data, ggplot2::aes(x = WTP, y = Prob_CE)) +
-    ggplot2::geom_line(color = "blue") +
-    ggplot2::geom_point() +
+  # Compute quadrant proportions
+  data$Quadrant <- with(data, 
+    ifelse(IncrementalCost >= 0 & IncrementalEffect >= 0, "Q1",
+    ifelse(IncrementalCost >= 0 & IncrementalEffect < 0, "Q4",
+    ifelse(IncrementalCost < 0 & IncrementalEffect >= 0, "Q2", "Q3"))))
+
+  quad_table <- table(data$Quadrant)
+  quad_prop <- round(prop.table(quad_table) * 100, 1)
+  quad_labels <- setNames(paste0(names(quad_prop), ": ", quad_prop, "%"), names(quad_prop))
+
+  max_x <- max(abs(data$IncrementalEffect)) * 1.1
+  max_y <- max(abs(data$IncrementalCost)) * 1.1
+
+  # Define axis breaks (10 per axis)
+  x_breaks <- pretty(c(-max_x, max_x), n = 10)
+  y_breaks <- pretty(c(-max_y, max_y), n = 10)
+
+  labels_df <- data.frame(
+    x = c(max(x_breaks) * 0.95, min(x_breaks) * 0.95, min(x_breaks) * 0.95, max(x_breaks) * 0.95),
+    y = c(max(y_breaks) * 0.95, max(y_breaks) * 0.95, min(y_breaks) * 0.95, min(y_breaks) * 0.95),
+    label = c(
+      ifelse("Q1" %in% names(quad_labels), quad_labels["Q1"], "Q1: 0%"),
+      ifelse("Q2" %in% names(quad_labels), quad_labels["Q2"], "Q2: 0%"),
+      ifelse("Q3" %in% names(quad_labels), quad_labels["Q3"], "Q3: 0%"),
+      ifelse("Q4" %in% names(quad_labels), quad_labels["Q4"], "Q4: 0%")
+    )
+  )
+
+  ggplot2::ggplot(data, ggplot2::aes(x = IncrementalEffect, y = IncrementalCost)) +
+    ggplot2::geom_point(alpha = 0.5, color = "black") +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed") +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+    ggplot2::geom_abline(slope = k, intercept = 0, color = "red", size = 1) +
+    ggplot2::geom_text(data = labels_df, ggplot2::aes(x = x, y = y, label = label), 
+                       inherit.aes = FALSE, color = "darkblue", size = 4.5) +
+    ggplot2::scale_x_continuous(limits = c(min(x_breaks), max(x_breaks)), breaks = x_breaks) +
+    ggplot2::scale_y_continuous(limits = c(min(y_breaks), max(y_breaks)), breaks = y_breaks) +
     ggplot2::theme_minimal() +
-    ggplot2::labs(title = "Cost-Effectiveness Acceptability Curve",
-                  x = "Willingness-to-Pay (WTP)",
-                  y = "Probability Cost-Effective") +
-    ggplot2::scale_y_continuous(limits = c(0, 1))
+    ggplot2::labs(title = "Cost-Effectiveness Plane",
+                  subtitle = if (is.null(subtitle)) paste0("WTP Threshold: ", k) else subtitle,
+                  x = "Incremental Effect",
+                  y = "Incremental Cost")
 }
+
