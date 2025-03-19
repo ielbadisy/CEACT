@@ -110,3 +110,13 @@ We welcome feedback and contributions.
 Submit suggestions, feature requests, or report issues via [GitHub Issues](https://github.com/ielbadisy/CEACT/issues).
 
 ---
+
+
+
+## TODO 
+
+[ ] document functions 
+[ ] review the all package
+[ ] add tests 
+[ ] build a pdf vignette 
+[ ] submit to CRAN 
