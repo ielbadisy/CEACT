@@ -82,7 +82,7 @@ plot_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000), ...) {
   #c = c(rnorm(100, 500, 1000), rnorm(100, 200, 420)),
   #e = c(rnorm(100, 0.6, 0.5), rnorm(100, 0.65, 0.06)),
   #g = rep(c("control", "treatment"), each = 100)
-)
+#)
 
 # 1. using boot_icer object
 #res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
