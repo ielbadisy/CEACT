@@ -25,7 +25,7 @@ streamline analysis workflows.
 ``` r
 # Install from GitHub using devtools
 # install.packages("devtools")
-# devtools::install_github("ielbadisy/CEACT")
+#devtools::install_github("ielbadisy/CEACT")
 library(CEACT)
 ```
 
@@ -69,7 +69,7 @@ df <- rbind(control, treatment)
 ### Run Cost-Effectiveness Analysis
 
 ``` r
-res_cea <- cea(cost + effect ~ group, data = df, ref = "control")
+res_cea <- CEACT::cea(cost + effect ~ group, data = df, ref = "control")
 summary(res_cea)
 ```
 
@@ -85,7 +85,7 @@ summary(res_cea)
 ### Bootstrap the ICER
 
 ``` r
-res_boot <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 300)
+res_boot <- CEACT::boot_icer(cost + effect ~ group, data = df, ref = "control", R = 300)
 summary(res_boot)
 ```
 
@@ -97,7 +97,7 @@ summary(res_boot)
 ### Visualize the Cost-Effectiveness Plane
 
 ``` r
-plot_ceplane(res_boot, k = 1000)
+CEACT::plot_ceplane(res_boot, k = 1000)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
@@ -105,7 +105,7 @@ plot_ceplane(res_boot, k = 1000)
 ### Plot the CEAC
 
 ``` r
-plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
+CEACT::plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -113,7 +113,7 @@ plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
 ### Compute NMB and CEAC Table
 
 ``` r
-nmb_table <- compute_nmb_ceac(cost + effect ~ 1, data = df, wtp_range = seq(0, 20000, 1000))
+nmb_table <- CEACT::compute_nmb_ceac(cost + effect ~ 1, data = df, wtp_range = seq(0, 20000, 1000))
 head(nmb_table)
 ```
 
@@ -124,20 +124,6 @@ head(nmb_table)
     ## 4 3000  525.0292  0.9750
     ## 5 4000  875.4256  1.0000
     ## 6 5000 1225.8221  1.0000
-
-------------------------------------------------------------------------
-
-## Documentation
-
-Use R help to access documentation for each function:
-
-``` r
-?cea
-?boot_icer
-?plot_ceplane
-?plot_ceac
-?compute_nmb_ceac
-```
 
 ------------------------------------------------------------------------
 
