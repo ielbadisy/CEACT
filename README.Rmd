@@ -109,7 +109,7 @@ Contribute via the [GitHub Issues page](https://github.com/ielbadisy/CEACT/issue
 - [x] Optional quadrant labels in CE plane
 - [x] Improved p-value formatting
 - [x] Complete function-level documentation using **roxygen2**
-- [ ] Fix warnings and notes
+- [x] Fix warnings and notes
 - [ ] Add unit tests using **testthat**
 - [ ] Create a PDF vignette
 - [ ] Write a comprehensive tutorial or use-case article
