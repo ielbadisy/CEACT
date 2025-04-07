@@ -33,7 +33,7 @@
 #'
 #' @export
 
-utils::globalVariables(c("WTP", "Prob_CE", "IncrementalEffect", "IncrementalCost"))
+utils::globalVariables(c("WTP", "Prob_CE")) 
 
 plot_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000), ...) {
   if (inherits(x, "boot_icer")) {
