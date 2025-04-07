@@ -5,95 +5,52 @@ CEACT Package
 
 ## Overview
 
-**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is a tool
-designed to produce a cost-effectiveness analysis of two interventions,
-specifically comparing treatment and control groups in clinical trials.
-This package aims to assist researchers and analysts in making informed
-decisions based on the cost-effectiveness of different health
-interventions.
+**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R
+package designed to facilitate the economic evaluation of healthcare
+interventions in randomized trials. It offers a suite of functions for
+estimating and visualizing core cost-effectiveness metrics, including:
 
-**CEACT** provides a complete suite of functions for computing and
-visualizing: - Incremental Cost-Effectiveness Ratio (ICER), -
-Cost-effectiveness planes, - Cost-effectiveness acceptability curves
-(CEAC), - Net monetary benefit (NMB) metrics.
+- Incremental Cost-Effectiveness Ratios (ICER),
+- Cost-effectiveness planes,
+- Cost-effectiveness acceptability curves (CEAC),
+- Net monetary benefit (NMB) metrics.
+
+CEACT is built using a formula-friendly, tidyverse-inspired interface to
+streamline analysis workflows.
 
 ------------------------------------------------------------------------
 
 ## Installation
 
 ``` r
+# Install from GitHub using devtools
 # install.packages("devtools")
-devtools::install_github("ielbadisy/CEACT")
+# devtools::install_github("ielbadisy/CEACT")
+library(CEACT)
 ```
-
-    ## Using GitHub PAT from the git credential store.
-
-    ## Downloading GitHub repo ielbadisy/CEACT@HEAD
-
-    ## pillar  (1.10.1 -> 1.10.2) [CRAN]
-    ## stringi (1.8.4  -> 1.8.7 ) [CRAN]
-
-    ## Installing 2 packages: pillar, stringi
-
-    ## Installing packages into '/home/imad-el-badisy/R/x86_64-pc-linux-gnu-library/4.4'
-    ## (as 'lib' is unspecified)
-
-    ## ── R CMD build ─────────────────────────────────────────────────────────────────
-    ##      checking for file ‘/tmp/Rtmp9Zy54p/remotes8b2b5efd8151/ielbadisy-CEACT-3bdbbd5/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/Rtmp9Zy54p/remotes8b2b5efd8151/ielbadisy-CEACT-3bdbbd5/DESCRIPTION’
-    ##   ─  preparing ‘CEACT’:
-    ##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-    ##   ─  checking for LF line-endings in source and make files and shell scripts
-    ## ─  checking for empty or unneeded directories
-    ##   ─  creating default NAMESPACE file
-    ## ─  building ‘CEACT_0.5.0.tar.gz’
-    ##      
-    ## 
-
-    ## Installing package into '/home/imad-el-badisy/R/x86_64-pc-linux-gnu-library/4.4'
-    ## (as 'lib' is unspecified)
 
 ------------------------------------------------------------------------
 
 ## Key Features
 
-- `cea()`: Estimate the ICER and provide summary statistics.
-- `boot_icer()`: Perform non-parametric bootstrapping of ICERs.
-- `plot_ceplane()`: Plot the cost-effectiveness plane.
+- `cea()`: Estimate ICER and generate a descriptive cost-effectiveness
+  summary.
+- `boot_icer()`: Perform bootstrap-based uncertainty analysis for ICER.
+- `plot_ceplane()`: Visualize the cost-effectiveness plane with optional
+  quadrant breakdown.
 - `plot_ceac()`: Plot the cost-effectiveness acceptability curve.
-- `compute_nmb_ceac()`: Compute net monetary benefits (NMB) and CEAC
-  tables.
+- `compute_nmb_ceac()`: Compute expected NMB and probability of
+  cost-effectiveness across WTP values.
 
 ------------------------------------------------------------------------
 
 ## Example Usage
 
-``` r
-# Load CEACT package
-library(CEACT)
-```
-
-    ## Loading required package: ggplot2
-
-    ## Loading required package: dplyr
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-    ## Loading required package: tidyr
-
-    ## Loading required package: boot
+### Simulate Trial Data
 
 ``` r
-# Simulate example data from a clinical trial
 set.seed(123)
+
 control <- data.frame(
   cost = rnorm(200, 500, 100),
   effect = rnorm(200, 0.4, 0.05),
@@ -106,23 +63,30 @@ treatment <- data.frame(
   group = "treatment"
 )
 
-data <- rbind(control, treatment)
+df <- rbind(control, treatment)
 ```
+
+### Run Cost-Effectiveness Analysis
 
 ``` r
-# Run cost-effectiveness analysis
-res_cea <- cea(cost + effect ~ group, data = data, ref = "control")
-res_cea
+res_cea <- cea(cost + effect ~ group, data = df, ref = "control")
+summary(res_cea)
 ```
 
+    ## Cost-Effectiveness Summary
+    ## Formula:  cost + effect ~ group 
+    ## Reference Group:  control 
+    ## ICER: -522.481 
+    ## 
     ##       Outcome           Control         Treatment  Delta            CI p.value
     ## 1   Mean Cost 499.14 (sd 94.32) 553.18 (sd 96.48) 54.035 [35.28;72.79]  <0.001
     ## 2 Mean Effect     0.4 (sd 0.05)     0.3 (sd 0.06) -0.103 [-0.11;-0.09]  <0.001
 
+### Bootstrap the ICER
+
 ``` r
-# Bootstrap ICER distribution
-res_boot <- boot_icer(cost + effect ~ group, data = data, ref = "control", R = 300)
-res_boot$summary
+res_boot <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 300)
+summary(res_boot)
 ```
 
     ##         Metric Estimate Observed StdError   Bias                  CI
@@ -130,48 +94,71 @@ res_boot$summary
     ## 2 Delta Effect   -0.104   -0.103    0.006  0.000     [-0.114;-0.092]
     ## 3         ICER -508.609 -522.481   88.503 13.873 [-718.413;-366.257]
 
+### Visualize the Cost-Effectiveness Plane
+
 ``` r
-# Plot Cost-Effectiveness Plane
 plot_ceplane(res_boot, k = 1000)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-# Plot Cost-Effectiveness Acceptability Curve
+### Plot the CEAC
 
-plot_ceac(res_boot, wtp_range = seq(0, 2000, 100))
+``` r
+plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
+```
 
-# Compute Net Monetary Benefit and CEAC Table
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-nmb_table \<- compute_nmb_ceac( data = data.frame(c =
-res_boot$boot_dist[, 1], e = res_boot$boot_dist\[, 2\]), wtp_range =
-seq(0, 2000, 100) ) print(nmb_table)
+### Compute NMB and CEAC Table
 
+``` r
+nmb_table <- compute_nmb_ceac(cost + effect ~ 1, data = df, wtp_range = seq(0, 20000, 1000))
+head(nmb_table)
+```
 
-    ---
-
-    ## Documentation
-
-    You can access documentation for each function using:
-
-    ```r
-    ?cea
-    ?boot_icer
-    ?plot_ceplane
-    ?plot_ceac
-    ?compute_nmb_ceac
+    ##    WTP      ENMB Prob_CE
+    ## 1    0 -526.1603  0.0000
+    ## 2 1000 -175.7638  0.1125
+    ## 3 2000  174.6327  0.8100
+    ## 4 3000  525.0292  0.9750
+    ## 5 4000  875.4256  1.0000
+    ## 6 5000 1225.8221  1.0000
 
 ------------------------------------------------------------------------
 
-## Feedback & contributions
+## Documentation
 
-We welcome feedback and contributions.  
-Submit suggestions, feature requests, or report issues via [GitHub
-Issues](https://github.com/ielbadisy/CEACT/issues).
+Use R help to access documentation for each function:
+
+``` r
+?cea
+?boot_icer
+?plot_ceplane
+?plot_ceac
+?compute_nmb_ceac
+```
+
+------------------------------------------------------------------------
+
+## Feedback & Contributions
+
+We welcome feedback, issues, and pull requests.  
+Contribute via the [GitHub Issues
+page](https://github.com/ielbadisy/CEACT/issues).
 
 ------------------------------------------------------------------------
 
 ## TODO
 
-\[ \] document functions \[ \] review the all package \[ \] add tests \[
-\] build a pdf vignette \[ \] submit to CRAN
+- [x] Formula-based interface across all functions
+- [x] Optional quadrant labels in CE plane
+- [x] Improved p-value formatting
+- [x] Complete function-level documentation using **roxygen2**
+- [ ] Fix warnings and notes
+- [ ] Add unit tests using **testthat**
+- [ ] Create a PDF vignette
+- [ ] Write a comprehensive tutorial or use-case article
+- [ ] Submit to **CRAN**
+
+------------------------------------------------------------------------

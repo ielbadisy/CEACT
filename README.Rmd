@@ -7,22 +7,23 @@ output: github_document
 
 ## Overview
 
-**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R package designed to facilitate the economic evaluation of healthcare interventions in clinical trials. It provides functions for computing and visualizing cost-effectiveness metrics including:
+**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R package designed to facilitate the economic evaluation of healthcare interventions in randomized trials. It offers a suite of functions for estimating and visualizing core cost-effectiveness metrics, including:
 
 - Incremental Cost-Effectiveness Ratios (ICER),
 - Cost-effectiveness planes,
 - Cost-effectiveness acceptability curves (CEAC),
 - Net monetary benefit (NMB) metrics.
 
-The package is formula-friendly and built with the tidyverse style in mind.
+CEACT is built using a formula-friendly, tidyverse-inspired interface to streamline analysis workflows.
 
 ---
 
 ## Installation
 
 ```{r}
+# Install from GitHub using devtools
 # install.packages("devtools")
-#devtools::install_github("ielbadisy/CEACT")
+# devtools::install_github("ielbadisy/CEACT")
 library(CEACT)
 ```
 
@@ -30,11 +31,11 @@ library(CEACT)
 
 ## Key Features
 
-- `cea()`: Estimate the ICER and provide a clear cost-effectiveness summary.
-- `boot_icer()`: Perform bootstrap-based uncertainty analysis of ICER.
-- `plot_ceplane()`: Visualize cost-effectiveness plane with quadrant info.
-- `plot_ceac()`: Display cost-effectiveness acceptability curve (CEAC).
-- `compute_nmb_ceac()`: Compute NMB and CEAC table using WTP thresholds.
+- `cea()`: Estimate ICER and generate a descriptive cost-effectiveness summary.
+- `boot_icer()`: Perform bootstrap-based uncertainty analysis for ICER.
+- `plot_ceplane()`: Visualize the cost-effectiveness plane with optional quadrant breakdown.
+- `plot_ceac()`: Plot the cost-effectiveness acceptability curve.
+- `compute_nmb_ceac()`: Compute expected NMB and probability of cost-effectiveness across WTP values.
 
 ---
 
@@ -65,8 +66,6 @@ df <- rbind(control, treatment)
 ```{r}
 res_cea <- cea(cost + effect ~ group, data = df, ref = "control")
 summary(res_cea)
-# ICER
-#attr(res_cea, "ICER")
 ```
 
 ### Bootstrap the ICER
@@ -79,7 +78,7 @@ summary(res_boot)
 ### Visualize the Cost-Effectiveness Plane
 
 ```{r}
-plot_ceplane(res_boot, k = 1000, show_quadrants = TRUE)
+plot_ceplane(res_boot, k = 1000)
 ```
 
 ### Plot the CEAC
@@ -99,7 +98,7 @@ head(nmb_table)
 
 ## Documentation
 
-For help with specific functions, use:
+Use R help to access documentation for each function:
 
 ```{r}
 ?cea
@@ -113,22 +112,23 @@ For help with specific functions, use:
 
 ## Feedback & Contributions
 
-Feedback, bug reports, and pull requests are welcome via the [GitHub Issues page](https://github.com/ielbadisy/CEACT/issues).
+We welcome feedback, issues, and pull requests.  
+Contribute via the [GitHub Issues page](https://github.com/ielbadisy/CEACT/issues).
 
 ---
 
 ## TODO
 
-- [x] Use formula interface consistently
-- [x] Add quadrant info to CE plane plot (optional)
-- [x] Improve p-value formatting
-- [ ] Make all functions S3 generic (`summary()`, `plot()`, etc.)
-- [ ] Write documentation
-- [ ] Add function-level documentation with **roxygen2**
-- [ ] Add tests using **testthat**
-- [ ] Build and include a PDF vignette
-- [ ] Write a comprehensive tutorial
+- [x] Formula-based interface across all functions
+- [x] Optional quadrant labels in CE plane
+- [x] Improved p-value formatting
+- [x] Complete function-level documentation using **roxygen2**
+- [ ] Fix warnings and notes
+- [ ] Add unit tests using **testthat**
+- [ ] Create a PDF vignette
+- [ ] Write a comprehensive tutorial or use-case article
 - [ ] Submit to **CRAN**
 
 ---
-```
+
+
