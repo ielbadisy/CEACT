@@ -1,23 +1,15 @@
-#' Plot the Cost-Effectiveness Plane
+#' Plot Cost-Effectiveness Plane
 #'
-#' This function visualizes the incremental cost and effect distributions from a bootstrap-based
-#' cost-effectiveness analysis. The cost-effectiveness plane helps assess the uncertainty around
-#' the ICER estimate and its placement within the decision quadrants.
+#' This function visualizes the cost-effectiveness plane, showing incremental costs vs effects
+#' from the bootstrap distribution.
 #'
-#' @param boot_icer_result A result object from [boot_icer()], containing the bootstrap distribution
-#'   of incremental costs and effects.
-#' @param k Optional numeric value specifying the willingness-to-pay (WTP) threshold. If provided,
-#'   a red line with slope `k` is drawn on the plane.
-#' @param subtitle Optional character string to use as the plot subtitle. If not provided and `k`
-#'   is specified, the subtitle will default to `"WTP Threshold: <k>"`.
+#' @name plot_ceplane
+#' @param boot_icer_result A `boot_icer` object from [boot_icer()].
+#' @param k Optional slope (willingness-to-pay threshold).
+#' @param subtitle Optional subtitle text.
 #'
-#' @return A `ggplot` object showing the cost-effectiveness plane.
-#'
-#' @details
-#' The plot shows:
-#' - A scatter plot of bootstrapped incremental costs and effects.
-#' - Vertical and horizontal dashed lines representing zero increments (i.e., origin lines).
-#' - Optionally, a red diagonal line with slope `k` representing the WTP threshold.
+#' @return A `ggplot` object displaying the cost-effectiveness plane.
+#' @export
 #'
 #' @examples
 #' set.seed(123)
@@ -26,11 +18,10 @@
 #'   e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
 #'   g = rep(c("control", "treatment"), each = 100)
 #' )
-#'
-#' res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+#' res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 300)
 #' plot_ceplane(res, k = 1000)
-#'
-#' @export
+
+
 
 utils::globalVariables(c("IncrementalEffect", "IncrementalCost")) 
 

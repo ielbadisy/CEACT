@@ -1,37 +1,30 @@
 #' Plot Cost-Effectiveness Acceptability Curve (CEAC)
 #'
 #' This function plots the CEAC, which displays the probability that an intervention is cost-effective
-#' compared to a reference, across a range of willingness-to-pay (WTP) thresholds. It can take as input
-#' either a `boot_icer` object or a formula interface using cost and effect variables.
+#' compared to a reference, across a range of willingness-to-pay (WTP) thresholds.
 #'
+#' @name plot_ceac
 #' @param x Either a result object from [boot_icer()], or a formula of the form `cost + effect ~ group`
-#'   or `cost + effect ~ 1` (in this case, `group` is ignored and the comparison is made internally).
+#'   or `cost + effect ~ 1`.
 #' @param data A data frame, required if `x` is a formula.
-#' @param wtp_range A numeric vector of WTP thresholds (default: `seq(0, 100000, 1000)`).
-#' @param ... Additional arguments passed to `ggplot2::labs()` (e.g. `subtitle`).
+#' @param wtp_range A numeric vector of WTP thresholds.
+#' @param ... Additional arguments passed to `ggplot2::labs()`.
 #'
 #' @return A `ggplot` object displaying the CEAC.
-#'
-#' @details
-#' When using a formula, the cost and effect variables must appear on the left-hand side (e.g., `cost + effect ~ group`).
-#' If `x` is a `boot_icer` object, the CEAC is based on the bootstrapped distribution of incremental cost and effect.
+#' @export
 #'
 #' @examples
-#' # Example with boot_icer object
 #' set.seed(123)
 #' df <- data.frame(
 #'   c = c(rnorm(100, 500, 100), rnorm(100, 200, 100)),
 #'   e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
 #'   g = rep(c("control", "treatment"), each = 100)
 #' )
-#'
 #' res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
 #' plot_ceac(res, wtp_range = seq(0, 20000, 500))
-#'
-#' # Example with only cost and effect
-#' plot_ceac(c + e ~ 1, data = df, wtp_range = seq(0, 20000, 500))
-#'
-#' @export
+#' plot_ceac(c + e ~ 1, data = df)
+
+
 
 utils::globalVariables(c("WTP", "Prob_CE")) 
 
