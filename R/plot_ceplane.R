@@ -1,6 +1,36 @@
-
-## plot the CE plane
-
+#' Plot the Cost-Effectiveness Plane
+#'
+#' This function visualizes the incremental cost and effect distributions from a bootstrap-based
+#' cost-effectiveness analysis. The cost-effectiveness plane helps assess the uncertainty around
+#' the ICER estimate and its placement within the decision quadrants.
+#'
+#' @param boot_icer_result A result object from [boot_icer()], containing the bootstrap distribution
+#'   of incremental costs and effects.
+#' @param k Optional numeric value specifying the willingness-to-pay (WTP) threshold. If provided,
+#'   a red line with slope `k` is drawn on the plane.
+#' @param subtitle Optional character string to use as the plot subtitle. If not provided and `k`
+#'   is specified, the subtitle will default to `"WTP Threshold: <k>"`.
+#'
+#' @return A `ggplot` object showing the cost-effectiveness plane.
+#'
+#' @details
+#' The plot shows:
+#' - A scatter plot of bootstrapped incremental costs and effects.
+#' - Vertical and horizontal dashed lines representing zero increments (i.e., origin lines).
+#' - Optionally, a red diagonal line with slope `k` representing the WTP threshold.
+#'
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   c = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
+#'   e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
+#'   g = rep(c("control", "treatment"), each = 100)
+#' )
+#'
+#' res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+#' plot_ceplane(res, k = 1000)
+#'
+#' @export
 plot_ceplane <- function(boot_icer_result, k = NULL, subtitle = NULL) {
   if (!"boot_dist" %in% names(boot_icer_result)) stop("Input must be result from boot_icer()")
 
