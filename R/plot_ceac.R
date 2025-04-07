@@ -32,6 +32,9 @@
 #' plot_ceac(c + e ~ 1, data = df, wtp_range = seq(0, 20000, 500))
 #'
 #' @export
+
+utils::globalVariables(c("WTP", "Prob_CE", "IncrementalEffect", "IncrementalCost"))
+
 plot_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000), ...) {
   if (inherits(x, "boot_icer")) {
     cost <- x$boot_dist[, 1]

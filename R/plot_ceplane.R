@@ -31,6 +31,10 @@
 #' plot_ceplane(res, k = 1000)
 #'
 #' @export
+
+utils::globalVariables(c("WTP", "Prob_CE", "IncrementalEffect", "IncrementalCost"))
+
+
 plot_ceplane <- function(boot_icer_result, k = NULL, subtitle = NULL) {
   if (!"boot_dist" %in% names(boot_icer_result)) stop("Input must be result from boot_icer()")
 
