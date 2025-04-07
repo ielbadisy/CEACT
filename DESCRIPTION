@@ -27,8 +27,6 @@ Depends:
     R (>= 3.5.0)
 Imports:
     ggplot2,
-    dplyr,
-    tidyr,
     boot
 Suggests:
     knitr,
