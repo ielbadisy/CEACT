@@ -1,5 +1,41 @@
-
-## boot_icer()
+#' Bootstrap Estimation of Incremental Cost-Effectiveness Ratio (ICER)
+#'
+#' Performs non-parametric bootstrap resampling to estimate the distribution of 
+#' the Incremental Cost-Effectiveness Ratio (ICER) between a treatment and control group.
+#'
+#' This function takes a formula of the form `cost + effect ~ group` and computes 
+#' bootstrap replicates of incremental cost and effect differences, as well as their ratio (ICER).
+#' Confidence intervals for each component are derived using the bias-corrected and accelerated (BCa) method.
+#'
+#' @param formula A formula of the form `cost + effect ~ group`, where `cost` and `effect` are numeric variables, 
+#' and `group` is a factor variable indicating treatment assignment.
+#' @param data A data frame containing the variables in the formula.
+#' @param ref The reference group label in the `group` variable (typically "control").
+#' @param R Number of bootstrap replications. Default is 1000.
+#' @param ci.type Type of confidence interval to compute with `boot.ci()`. Default is `"bca"`.
+#'
+#' @return An object of class `boot_icer`, which contains:
+#' \describe{
+#'   \item{summary}{A data frame with estimates, standard errors, bias, and confidence intervals for Delta Cost, Delta Effect, and ICER.}
+#'   \item{boot_dist}{A matrix of bootstrap replicates: one row per sample, with columns for Delta Cost, Delta Effect, and ICER.}
+#'   \item{formula}{The original formula used.}
+#'   \item{ref}{The reference group.}
+#'   \item{call}{The matched call.}
+#' }
+#' 
+#' The object supports a custom `summary()` method.
+#'
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   c = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
+#'   e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
+#'   g = rep(c("control", "treatment"), each = 100)
+#' )
+#' res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+#' summary(res)
+#'
+#' @export
 boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
   terms_obj <- terms(formula)
   vars <- all.vars(terms_obj)
