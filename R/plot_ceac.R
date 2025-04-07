@@ -1,55 +1,60 @@
-# -------------------------------
-# Plot Cost-Effectiveness Plane (boot_icer output directly)
-# -------------------------------
-plot_ceplane <- function(boot_icer_result, k = 500, subtitle = NULL) {
-  if (!"boot_dist" %in% names(boot_icer_result)) stop("Input must be result from boot_icer()")
 
-  data <- data.frame(
-    IncrementalCost = boot_icer_result$boot_dist[, 1],
-    IncrementalEffect = boot_icer_result$boot_dist[, 2]
-  )
+## plot CE acceptability curve
+plot_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000), ...) {
+  if (inherits(x, "boot_icer")) {
+    cost <- x$boot_dist[, 1]
+    effect <- x$boot_dist[, 2]
+  } else if (inherits(x, "formula")) {
+    if (is.null(data)) stop("If using a formula, you must supply a data frame.")
 
-  # Compute quadrant proportions
-  data$Quadrant <- with(data, 
-    ifelse(IncrementalCost >= 0 & IncrementalEffect >= 0, "Q1",
-    ifelse(IncrementalCost >= 0 & IncrementalEffect < 0, "Q4",
-    ifelse(IncrementalCost < 0 & IncrementalEffect >= 0, "Q2", "Q3"))))
+    # Parse formula and extract cost + effect
+    terms_obj <- terms(x)
+    vars <- all.vars(terms_obj)
+    if (length(vars) < 2) stop("Formula must be of the form: cost + effect ~ group or cost + effect ~ 1")
 
-  quad_table <- table(data$Quadrant)
-  quad_prop <- round(prop.table(quad_table) * 100, 1)
-  quad_labels <- setNames(paste0(names(quad_prop), ": ", quad_prop, "%"), names(quad_prop))
+    cost <- eval(parse(text = vars[1]), envir = data)
+    effect <- eval(parse(text = vars[2]), envir = data)
+  } else {
+    stop("x must be either a 'boot_icer' object or a formula.")
+  }
 
-  max_x <- max(abs(data$IncrementalEffect)) * 1.1
-  max_y <- max(abs(data$IncrementalCost)) * 1.1
+  # Compute CEAC
+  ceac_df <- data.frame()
+  for (wtp in wtp_range) {
+    inb <- wtp * effect - cost
+    prob_ce <- mean(inb > 0)
+    ceac_df <- rbind(ceac_df, data.frame(WTP = wtp, Prob_CE = prob_ce))
+  }
 
-  # Define axis breaks (10 per axis)
-  x_breaks <- pretty(c(-max_x, max_x), n = 10)
-  y_breaks <- pretty(c(-max_y, max_y), n = 10)
-
-  labels_df <- data.frame(
-    x = c(max(x_breaks) * 0.95, min(x_breaks) * 0.95, min(x_breaks) * 0.95, max(x_breaks) * 0.95),
-    y = c(max(y_breaks) * 0.95, max(y_breaks) * 0.95, min(y_breaks) * 0.95, min(y_breaks) * 0.95),
-    label = c(
-      ifelse("Q1" %in% names(quad_labels), quad_labels["Q1"], "Q1: 0%"),
-      ifelse("Q2" %in% names(quad_labels), quad_labels["Q2"], "Q2: 0%"),
-      ifelse("Q3" %in% names(quad_labels), quad_labels["Q3"], "Q3: 0%"),
-      ifelse("Q4" %in% names(quad_labels), quad_labels["Q4"], "Q4: 0%")
-    )
-  )
-
-  ggplot2::ggplot(data, ggplot2::aes(x = IncrementalEffect, y = IncrementalCost)) +
-    ggplot2::geom_point(alpha = 0.5, color = "black") +
-    ggplot2::geom_vline(xintercept = 0, linetype = "dashed") +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
-    ggplot2::geom_abline(slope = k, intercept = 0, color = "red", size = 1) +
-    ggplot2::geom_text(data = labels_df, ggplot2::aes(x = x, y = y, label = label), 
-                       inherit.aes = FALSE, color = "darkblue", size = 4.5) +
-    ggplot2::scale_x_continuous(limits = c(min(x_breaks), max(x_breaks)), breaks = x_breaks) +
-    ggplot2::scale_y_continuous(limits = c(min(y_breaks), max(y_breaks)), breaks = y_breaks) +
+  # Plot
+  ggplot2::ggplot(ceac_df, ggplot2::aes(x = WTP, y = Prob_CE)) +
+    ggplot2::geom_line(color = "steelblue", linewidth = 1) +
+    ggplot2::geom_point(color = "steelblue") +
     ggplot2::theme_minimal() +
-    ggplot2::labs(title = "Cost-Effectiveness Plane",
-                  subtitle = if (is.null(subtitle)) paste0("WTP Threshold: ", k) else subtitle,
-                  x = "Incremental Effect",
-                  y = "Incremental Cost")
+    ggplot2::labs(
+      title = "Cost-Effectiveness Acceptability Curve",
+      subtitle = "Probability of being cost-effective across WTP thresholds",
+      x = "Willingness-to-Pay (WTP)",
+      y = "Probability Cost-Effective",
+      ...
+    ) +
+    ggplot2::scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1))
 }
 
+
+
+#*******************************************************************************
+
+## Example
+#df <- data.frame(
+  #c = c(rnorm(100, 500, 1000), rnorm(100, 200, 420)),
+  #e = c(rnorm(100, 0.6, 0.5), rnorm(100, 0.65, 0.06)),
+  #g = rep(c("control", "treatment"), each = 100)
+)
+
+# 1. using boot_icer object
+#res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+#plot_ceac(res)
+
+# 2. using only cost and effect without group
+#plot_ceac(c + e ~ 1, data = df)

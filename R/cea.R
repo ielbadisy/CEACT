@@ -1,6 +1,5 @@
-# -------------------------------
-# Observed Cost-Effectiveness Summary (Formula Interface)
-# -------------------------------
+
+## computing CEA (observed) results
 cea <- function(formula, data, ref, na.omit = TRUE) {
   terms_obj <- terms(formula)
   vars <- all.vars(terms_obj)
@@ -30,9 +29,9 @@ cea <- function(formula, data, ref, na.omit = TRUE) {
   ci <- c(t_cost$conf.int, t_eff$conf.int)
 
   pvals <- c(t_cost$p.value, t_eff$p.value)
-  pvals_fmt <- ifelse(pvals < 0.001, "<0.001", round(pvals, 4))
+  pvals_fmt <- ifelse(pvals < 0.001, "<0.001", formatC(pvals, format = "f", digits = 4))
 
-  out <- data.frame(
+  result_table <- data.frame(
     Outcome = c("Mean Cost", "Mean Effect"),
     Control = c(paste0(round(c_mean[1], 2), " (sd ", round(c_sd[1], 2), ")"),
                 paste0(round(e_mean[1], 2), " (sd ", round(e_sd[1], 2), ")")),
@@ -41,9 +40,51 @@ cea <- function(formula, data, ref, na.omit = TRUE) {
     Delta = round(c(delta_c, delta_e), 3),
     CI = c(paste0("[", round(ci[1], 2), ";", round(ci[2], 2), "]"),
            paste0("[", round(ci[3], 2), ";", round(ci[4], 2), "]")),
-    p.value = pvals_fmt
+    p.value = pvals_fmt,
+    stringsAsFactors = FALSE
   )
 
-  attr(out, "ICER") <- round(ICER, 3)
-  return(out)
+  structure(
+    result_table,
+    ICER = round(ICER, 3),
+    formula = formula,
+    ref = ref,
+    call = match.call(),
+    class = "cea"
+  )
 }
+
+#' @export
+summary.cea <- function(object, ...) {
+  cat("Cost-Effectiveness Summary\n")
+  cat("Formula: ", deparse(attr(object, "formula")), "\n")
+  cat("Reference Group: ", attr(object, "ref"), "\n")
+  cat("ICER:", attr(object, "ICER"), "\n\n")
+
+  df <- as.data.frame(unclass(object))  # ensure it is printed correctly
+  print(df)
+  invisible(object)
+}
+
+
+#' @export
+print.cea <- function(x, ...) {
+  cat("Cost-Effectiveness Analysis Result\n")
+  cat("Use `summary()` for details.\n")
+  invisible(x)
+}
+
+#*******************************************************************************
+
+# simulate example data
+#set.seed(123)
+#df <- data.frame(
+  #cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
+  #effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
+  #group = rep(c("control", "treatment"), each = 100)
+#)
+
+#res <- cea(cost + effect ~ group, data = df, ref = "control")
+
+#print(res)
+#summary(res)

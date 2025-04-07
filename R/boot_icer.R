@@ -1,10 +1,5 @@
 
-
-
-
-# -------------------------------
-# Bootstrap ICER Function (Formula Interface)
-# -------------------------------
+## boot_icer()
 boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
   terms_obj <- terms(formula)
   vars <- all.vars(terms_obj)
@@ -17,22 +12,20 @@ boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
   data <- data[, c(cost, effect, group)]
   colnames(data) <- c("cost", "effect", "group")
 
-  require(boot)
-
   stat_func <- function(d, i) {
     d <- d[i, ]
     delta_cost <- mean(d$cost[d$group != ref]) - mean(d$cost[d$group == ref])
     delta_effect <- mean(d$effect[d$group != ref]) - mean(d$effect[d$group == ref])
     ICER <- delta_cost / delta_effect
-    return(c(delta_cost, delta_effect, ICER))
+    c(delta_cost, delta_effect, ICER)
   }
 
   set.seed(1234)
-  bt <- boot(data, stat_func, R = R)
+  bt <- boot::boot(data, stat_func, R = R)
 
-  ci_dc <- boot.ci(bt, type = ci.type, index = 1)$bca[4:5]
-  ci_de <- boot.ci(bt, type = ci.type, index = 2)$bca[4:5]
-  ci_icer <- boot.ci(bt, type = ci.type, index = 3)$bca[4:5]
+  ci_dc <- boot::boot.ci(bt, type = ci.type, index = 1)$bca[4:5]
+  ci_de <- boot::boot.ci(bt, type = ci.type, index = 2)$bca[4:5]
+  ci_icer <- boot::boot.ci(bt, type = ci.type, index = 3)$bca[4:5]
 
   summary_tbl <- data.frame(
     Metric = c("Delta Cost", "Delta Effect", "ICER"),
@@ -45,5 +38,34 @@ boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca") {
            paste0("[", round(ci_icer[1], 3), ";", round(ci_icer[2], 3), "]"))
   )
 
-  return(list(summary = summary_tbl, boot_dist = bt$t))
+  structure(
+    list(
+      summary = summary_tbl,
+      boot_dist = bt$t,
+      formula = formula,
+      ref = ref,
+      call = match.call()
+    ),
+    class = "boot_icer"
+  )
 }
+
+#' @export
+summary.boot_icer <- function(object, ...) {
+  if (!inherits(object, "boot_icer")) stop("Object must be of class 'boot_icer'")
+  object$summary
+}
+
+
+#******************************************************************************
+
+## example
+#set.seed(123)
+#df <- data.frame(
+  #c = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
+  #e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
+  #g = rep(c("control", "treatment"), each = 100)
+#)
+#res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+
+#summary(res)
