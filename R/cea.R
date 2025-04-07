@@ -1,5 +1,40 @@
-
-## computing CEA (observed) results
+#' Cost-Effectiveness Analysis Summary (Observed)
+#'
+#' Computes observed summary statistics for a cost-effectiveness analysis comparing two groups 
+#' (typically control and treatment). This includes mean and standard deviation of cost and effect, 
+#' differences (deltas), confidence intervals, p-values from t-tests, and the Incremental Cost-Effectiveness Ratio (ICER).
+#'
+#' @param formula A formula of the form `cost + effect ~ group`, where:
+#'   - `cost` is the numeric column for cost,
+#'   - `effect` is the numeric column for effectiveness or utility (e.g., QALYs),
+#'   - `group` is a grouping variable with at least two levels.
+#' @param data A data frame containing the variables used in the formula.
+#' @param ref A character string specifying the reference group in the `group` variable (typically "control").
+#' @param na.omit Logical; whether to remove rows with missing values. Default is `TRUE`.
+#'
+#' @return An object of class `cea`, which is a data frame with the following columns:
+#' \describe{
+#'   \item{Outcome}{"Mean Cost" or "Mean Effect"}
+#'   \item{Control}{Mean and SD for the control group}
+#'   \item{Treatment}{Mean and SD for the treatment group}
+#'   \item{Delta}{Difference between treatment and control}
+#'   \item{CI}{95% confidence interval for the difference}
+#'   \item{p.value}{P-value from a t-test comparing groups}
+#' }
+#' The object also contains attributes for the ICER, formula, reference group, and matched call.
+#'
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
+#'   effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
+#'   group = rep(c("control", "treatment"), each = 100)
+#' )
+#' res <- cea(cost + effect ~ group, data = df, ref = "control")
+#' print(res)
+#' summary(res)
+#'
+#' @export
 cea <- function(formula, data, ref, na.omit = TRUE) {
   terms_obj <- terms(formula)
   vars <- all.vars(terms_obj)
