@@ -9,7 +9,13 @@
 #' @export
 #'
 #' @examples
-#' plot_tornado(dsa_result, metric = "ICER")
+#' # Simulated deterministic sensitivity analysis result
+#' dsa_result <- data.frame(
+#'   Parameter = c("Cost A", "Cost B", "Effect A"),
+#'   ICER = c(1000, 1200, 800),
+#'   NMB = c(20000, 19500, 21000)
+#' )
+#' 
 plot_tornado <- function(df, metric = "ICER") {
   if (!(metric %in% names(df))) stop(paste("Column", metric, "not found in data"))
 
