@@ -3,8 +3,6 @@ title: "CEACT Package"
 output: github_document
 ---
 
-# CEACT: Cost-Effectiveness Analysis for Clinical Trials
-
 ## Overview
 
 **CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R package designed to facilitate the economic evaluation of healthcare interventions in randomized trials. It offers a suite of functions for estimating and visualizing core cost-effectiveness metrics, including:
@@ -111,8 +109,8 @@ Contribute via the [GitHub Issues page](https://github.com/ielbadisy/CEACT/issue
 - [x] Complete function-level documentation using **roxygen2**
 - [x] Fix warnings and notes
 - [ ] Add unit tests using **testthat**
-- [ ] Create a PDF vignette
-- [ ] Write a comprehensive tutorial or use-case article
+- [ ] Create a PDF vignette (theory + practical examples)
+- [ ] Write a comprehensive tutorial (or use-case article ?)
 - [ ] Submit to **CRAN**
 
 ---
