@@ -2,32 +2,40 @@
 % Please edit documentation in R/plot_ceac.R
 \name{plot_ceac}
 \alias{plot_ceac}
-\title{Plot Cost-Effectiveness Acceptability Curve (CEAC)}
+\title{Plot Cost-Effectiveness Acceptability Curve}
+\usage{
+plot_ceac(
+  x,
+  data = NULL,
+  wtp_range = seq(0, 1e+05, 1000),
+  ref = NULL,
+  R = 1000,
+  ...
+)
+}
 \arguments{
-\item{x}{Either a result object from \code{\link[=boot_icer]{boot_icer()}}, or a formula of the form \code{cost + effect ~ group}
-or \code{cost + effect ~ 1}.}
+\item{x}{A \code{boot_icer} object, \code{nmb_ceac} object, or formula of the form
+\code{cost + effect ~ group}.}
 
-\item{data}{A data frame, required if \code{x} is a formula.}
+\item{data}{Data frame required when \code{x} is a formula.}
 
-\item{wtp_range}{A numeric vector of WTP thresholds.}
+\item{wtp_range}{Numeric vector of willingness-to-pay thresholds.}
 
-\item{...}{Additional arguments passed to \code{ggplot2::labs()}.}
+\item{ref}{Reference group label required when \code{x} is a formula.}
+
+\item{R}{Number of bootstrap replications used when \code{x} is a formula.}
+
+\item{...}{Additional arguments passed to \code{\link[ggplot2:labs]{ggplot2::labs()}}.}
 }
 \value{
-A \code{ggplot} object displaying the CEAC.
+A \code{ggplot} object.
 }
 \description{
-This function plots the CEAC, which displays the probability that an intervention is cost-effective
-compared to a reference, across a range of willingness-to-pay (WTP) thresholds.
+Plots the probability that treatment is cost-effective across
+willingness-to-pay thresholds.
 }
 \examples{
-set.seed(123)
-df <- data.frame(
-  c = c(rnorm(100, 500, 100), rnorm(100, 200, 100)),
-  e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  g = rep(c("control", "treatment"), each = 100)
-)
-res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
-plot_ceac(res, wtp_range = seq(0, 20000, 500))
-plot_ceac(c + e ~ 1, data = df)
+df <- simulate_ce_trial(n = 100, seed = 123)
+res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
+plot_ceac(res, wtp_range = seq(0, 50000, 5000))
 }

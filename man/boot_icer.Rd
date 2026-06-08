@@ -2,51 +2,36 @@
 % Please edit documentation in R/boot_icer.R
 \name{boot_icer}
 \alias{boot_icer}
-\title{Bootstrap Estimation of Incremental Cost-Effectiveness Ratio (ICER)}
+\title{Bootstrap Incremental Cost, Effect, ICER, and Net Benefit}
 \usage{
-boot_icer(formula, data, ref, R = 1000, ci.type = "bca")
+boot_icer(formula, data, ref, R = 1000, ci.type = "bca", na.omit = TRUE)
 }
 \arguments{
-\item{formula}{A formula of the form \code{cost + effect ~ group}, where \code{cost} and \code{effect} are numeric variables,
-and \code{group} is a factor variable indicating treatment assignment.}
+\item{formula}{A formula of the form \code{cost + effect ~ group}.}
 
 \item{data}{A data frame containing the variables in the formula.}
 
-\item{ref}{The reference group label in the \code{group} variable (typically "control").}
+\item{ref}{Reference group label.}
 
-\item{R}{Number of bootstrap replications. Default is 1000.}
+\item{R}{Number of bootstrap replications.}
 
-\item{ci.type}{Type of confidence interval to compute with \code{boot.ci()}. Default is \code{"bca"}.}
+\item{ci.type}{Confidence interval type passed to \code{\link[boot:boot.ci]{boot::boot.ci()}}.}
+
+\item{na.omit}{Logical; whether to remove rows with missing values.}
 }
 \value{
-An object of class \code{boot_icer}, which contains:
-\describe{
-\item{summary}{A data frame with estimates, standard errors, bias, and confidence intervals for Delta Cost, Delta Effect, and ICER.}
-\item{boot_dist}{A matrix of bootstrap replicates: one row per sample, with columns for Delta Cost, Delta Effect, and ICER.}
-\item{formula}{The original formula used.}
-\item{ref}{The reference group.}
-\item{call}{The matched call.}
-}
-
-The object supports a custom \code{summary()} method.
+An object of class \code{boot_icer} containing a summary table,
+bootstrap distribution, observed estimates, formula, reference group, and
+matched call.
 }
 \description{
-Performs non-parametric bootstrap resampling to estimate the distribution of
-the Incremental Cost-Effectiveness Ratio (ICER) between a treatment and control group.
-}
-\details{
-This function takes a formula of the form \code{cost + effect ~ group} and computes
-bootstrap replicates of incremental cost and effect differences, as well as their ratio (ICER).
-Confidence intervals for each component are derived using the bias-corrected and accelerated (BCa) method.
+Performs non-parametric stratified bootstrap resampling for a two-arm
+trial-based economic evaluation. Resampling is stratified by trial group to
+preserve arm sizes.
 }
 \examples{
-set.seed(123)
-df <- data.frame(
-  c = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-  e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  g = rep(c("control", "treatment"), each = 100)
-)
-res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 500)
+df <- simulate_ce_trial(n = 100, seed = 123)
+res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
 summary(res)
 
 }

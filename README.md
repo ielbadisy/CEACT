@@ -1,150 +1,160 @@
 CEACT Package
 ================
 
-# CEACT: Cost-Effectiveness Analysis for Clinical Trials
-
 ## Overview
 
-**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R
-package designed to facilitate the economic evaluation of healthcare
-interventions in randomized trials. It offers a suite of functions for
-estimating and visualizing core cost-effectiveness metrics, including:
+**CEACT** *(Cost-Effectiveness Analysis Toolkit for Clinical Trials)* is
+an R package for two-arm trial-based economic evaluation. It implements
+a formula-based workflow for:
 
-- Incremental Cost-Effectiveness Ratios (ICER),
-- Cost-effectiveness planes,
-- Cost-effectiveness acceptability curves (CEAC),
-- Net monetary benefit (NMB) metrics.
+- observed incremental cost, incremental effect, and ICER summaries;
+- stratified non-parametric bootstrap uncertainty;
+- incremental net monetary benefit (INMB);
+- cost-effectiveness acceptability curves (CEACs);
+- cost-effectiveness planes;
+- one-way deterministic sensitivity analysis.
 
-CEACT is built using a formula-friendly, tidyverse-inspired interface to
-streamline analysis workflows.
-
-------------------------------------------------------------------------
+CEACT is intended for individual-level clinical-trial datasets with one
+cost variable, one effect variable, and a two-level treatment group.
 
 ## Installation
 
 ``` r
-# Install from GitHub using devtools
 # install.packages("devtools")
-#devtools::install_github("ielbadisy/CEACT")
+devtools::install_github("ielbadisy/CEACT")
+```
+
+``` r
 library(CEACT)
 ```
 
-------------------------------------------------------------------------
-
-## Key Features
-
-- `cea()`: Estimate ICER and generate a descriptive cost-effectiveness
-  summary.
-- `boot_icer()`: Perform bootstrap-based uncertainty analysis for ICER.
-- `plot_ceplane()`: Visualize the cost-effectiveness plane with optional
-  quadrant breakdown.
-- `plot_ceac()`: Plot the cost-effectiveness acceptability curve.
-- `compute_nmb_ceac()`: Compute expected NMB and probability of
-  cost-effectiveness across WTP values.
-
-------------------------------------------------------------------------
-
-## Example Usage
-
-### Simulate Trial Data
+## Simulate Trial Data
 
 ``` r
-set.seed(123)
-
-control <- data.frame(
-  cost = rnorm(200, 500, 100),
-  effect = rnorm(200, 0.4, 0.05),
-  group = "control"
-)
-
-treatment <- data.frame(
-  cost = rnorm(200, 550, 100),
-  effect = rnorm(200, 0.3, 0.06),
-  group = "treatment"
-)
-
-df <- rbind(control, treatment)
+trial <- simulate_ce_trial(n = 200, seed = 123)
+head(trial)
+#>       cost    effect   group
+#> 1 4495.572 0.9289862 control
+#> 2 4792.840 0.8463038 control
+#> 3 6402.837 0.7171661 control
+#> 4 5063.458 0.7747625 control
+#> 5 5116.359 0.6809741 control
+#> 6 6543.558 0.6986401 control
 ```
 
-### Run Cost-Effectiveness Analysis
+## Observed Cost-Effectiveness Summary
 
 ``` r
-res_cea <- CEACT::cea(cost + effect ~ group, data = df, ref = "control")
+res_cea <- cea(cost + effect ~ group, data = trial, ref = "control")
 summary(res_cea)
+#> Cost-Effectiveness Summary
+#> Formula: cost + effect ~ group
+#> Reference group: control
+#> Treatment group: treatment
+#> Incremental cost: 639.489
+#> Incremental effect: 0.054
+#> ICER: 11818.69
+#> 
+#>              Outcome             Reference             Treatment Difference
+#> delta_cost      Cost 4992.287 (SD 848.844) 5631.775 (SD 964.805)    639.489
+#> delta_effect  Effect      0.724 (SD 0.099)      0.778 (SD 0.113)      0.054
+#>                             CI p.value
+#> delta_cost   [460.84; 818.138]  <0.001
+#> delta_effect    [0.033; 0.075]  <0.001
 ```
 
-    ## Cost-Effectiveness Summary
-    ## Formula:  cost + effect ~ group 
-    ## Reference Group:  control 
-    ## ICER: -522.481 
-    ## 
-    ##       Outcome           Control         Treatment  Delta            CI p.value
-    ## 1   Mean Cost 499.14 (sd 94.32) 553.18 (sd 96.48) 54.035 [35.28;72.79]  <0.001
-    ## 2 Mean Effect     0.4 (sd 0.05)     0.3 (sd 0.06) -0.103 [-0.11;-0.09]  <0.001
-
-### Bootstrap the ICER
+## Bootstrap Uncertainty
 
 ``` r
-res_boot <- CEACT::boot_icer(cost + effect ~ group, data = df, ref = "control", R = 300)
+set.seed(42)
+res_boot <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
+                      R = 500, ci.type = "perc")
 summary(res_boot)
+#>                   Metric  Observed BootstrapMean StdError    Bias
+#> DeltaCost     Delta Cost   639.489       634.728   90.584  -4.761
+#> DeltaEffect Delta Effect     0.054         0.054    0.010  -0.001
+#> ICER                ICER 11818.694     12310.932 3130.320 492.238
+#>                                CI
+#> DeltaCost      [455.471; 810.055]
+#> DeltaEffect        [0.033; 0.073]
+#> ICER        [7529.884; 18944.767]
 ```
 
-    ##         Metric Estimate Observed StdError   Bias                  CI
-    ## 1   Delta Cost   52.553   54.035    8.983 -1.481     [37.634;73.698]
-    ## 2 Delta Effect   -0.104   -0.103    0.006  0.000     [-0.114;-0.092]
-    ## 3         ICER -508.609 -522.481   88.503 13.873 [-718.413;-366.257]
-
-### Visualize the Cost-Effectiveness Plane
+## Cost-Effectiveness Plane
 
 ``` r
-CEACT::plot_ceplane(res_boot, k = 1000)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-### Plot the CEAC
-
-``` r
-CEACT::plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
+plot_ceplane(res_boot, k = 20000)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-### Compute NMB and CEAC Table
+## Net Monetary Benefit and CEAC
 
 ``` r
-nmb_table <- CEACT::compute_nmb_ceac(cost + effect ~ 1, data = df, wtp_range = seq(0, 20000, 1000))
-head(nmb_table)
+ceac_table <- compute_nmb_ceac(res_boot, wtp_range = seq(0, 50000, 5000))
+head(ceac_table)
+#>     WTP       ENMB Prob_CE
+#> 1     0 -639.48888   0.000
+#> 2  5000 -368.94762   0.000
+#> 3 10000  -98.40636   0.224
+#> 4 15000  172.13490   0.826
+#> 5 20000  442.67616   0.982
+#> 6 25000  713.21742   0.996
+plot_ceac(ceac_table)
 ```
 
-    ##    WTP      ENMB Prob_CE
-    ## 1    0 -526.1603  0.0000
-    ## 2 1000 -175.7638  0.1125
-    ## 3 2000  174.6327  0.8100
-    ## 4 3000  525.0292  0.9750
-    ## 5 4000  875.4256  1.0000
-    ## 6 5000 1225.8221  1.0000
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-------------------------------------------------------------------------
+## Deterministic Sensitivity Analysis
 
-## Feedback & Contributions
+``` r
+dsa_result <- dsa_icer(cost + effect ~ group, data = trial,
+                       param = "effect",
+                       range = seq(0.74, 0.82, 0.02),
+                       ref = "control",
+                       metric = "INMB",
+                       k = 20000)
+dsa_result
+#>   Parameter       INMB
+#> 1      0.74 -320.20684
+#> 2      0.76   79.79316
+#> 3      0.78  479.79316
+#> 4      0.80  879.79316
+#> 5      0.82 1279.79316
+plot_tornado(dsa_result, metric = "INMB")
+```
 
-We welcome feedback, issues, and pull requests.  
-Contribute via the [GitHub Issues
-page](https://github.com/ielbadisy/CEACT/issues).
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-------------------------------------------------------------------------
+## Real Trial-Based CEA Dataset
 
-## TODO
+CEACT also includes `trial_cea`, a 500-patient example dataset with
+treatment, total cost, and QALY outcomes used in teaching material for
+trial-based economic evaluation.
 
-- [x] Formula-based interface across all functions
-- [x] Optional quadrant labels in CE plane
-- [x] Improved p-value formatting
-- [x] Complete function-level documentation using **roxygen2**
-- [ ] Fix warnings and notes
-- [ ] Add unit tests using **testthat**
-- [ ] Create a PDF vignette
-- [ ] Write a comprehensive tutorial or use-case article
-- [ ] Submit to **CRAN**
+``` r
+data("trial_cea")
+real_res <- cea(cost + qaly ~ group, data = trial_cea, ref = "control")
+summary(real_res)
+#> Cost-Effectiveness Summary
+#> Formula: cost + qaly ~ group
+#> Reference group: control
+#> Treatment group: treatment
+#> Incremental cost: 25
+#> Incremental effect: 0.042
+#> ICER: 588.802
+#> 
+#>              Outcome          Reference          Treatment Difference
+#> delta_cost      Cost 3015 (SD 1582.802) 3040 (SD 1168.737)     25.000
+#> delta_effect  Effect   0.573 (SD 0.217)   0.615 (SD 0.205)      0.042
+#>                             CI p.value
+#> delta_cost   [-219.54; 269.54]  0.8409
+#> delta_effect     [0.005; 0.08]  0.0251
+```
 
-------------------------------------------------------------------------
+## Package Quality
+
+- Unit tests are implemented with **testthat**.
+- Function documentation is generated with **roxygen2**.
+- A PDF-capable vignette is available in `vignettes/`.
+- The package source builds and checks successfully with `R CMD check`.

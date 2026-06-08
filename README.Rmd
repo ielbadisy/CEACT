@@ -3,116 +3,102 @@ title: "CEACT Package"
 output: github_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+```
+
 ## Overview
 
-**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R package designed to facilitate the economic evaluation of healthcare interventions in randomized trials. It offers a suite of functions for estimating and visualizing core cost-effectiveness metrics, including:
+**CEACT** *(Cost-Effectiveness Analysis Toolkit for Clinical Trials)* is an R
+package for two-arm trial-based economic evaluation. It implements a
+formula-based workflow for:
 
-- Incremental Cost-Effectiveness Ratios (ICER),
-- Cost-effectiveness planes,
-- Cost-effectiveness acceptability curves (CEAC),
-- Net monetary benefit (NMB) metrics.
+- observed incremental cost, incremental effect, and ICER summaries;
+- stratified non-parametric bootstrap uncertainty;
+- incremental net monetary benefit (INMB);
+- cost-effectiveness acceptability curves (CEACs);
+- cost-effectiveness planes;
+- one-way deterministic sensitivity analysis.
 
-CEACT is built using a formula-friendly, tidyverse-inspired interface to streamline analysis workflows.
-
----
+CEACT is intended for individual-level clinical-trial datasets with one cost
+variable, one effect variable, and a two-level treatment group.
 
 ## Installation
 
-```{r}
-# Install from GitHub using devtools
+```{r eval=FALSE}
 # install.packages("devtools")
-#devtools::install_github("ielbadisy/CEACT")
+devtools::install_github("ielbadisy/CEACT")
+```
+
+```{r}
 library(CEACT)
 ```
 
----
-
-## Key Features
-
-- `cea()`: Estimate ICER and generate a descriptive cost-effectiveness summary.
-- `boot_icer()`: Perform bootstrap-based uncertainty analysis for ICER.
-- `plot_ceplane()`: Visualize the cost-effectiveness plane with optional quadrant breakdown.
-- `plot_ceac()`: Plot the cost-effectiveness acceptability curve.
-- `compute_nmb_ceac()`: Compute expected NMB and probability of cost-effectiveness across WTP values.
-
----
-
-## Example Usage
-
-### Simulate Trial Data
+## Simulate Trial Data
 
 ```{r}
-set.seed(123)
-
-control <- data.frame(
-  cost = rnorm(200, 500, 100),
-  effect = rnorm(200, 0.4, 0.05),
-  group = "control"
-)
-
-treatment <- data.frame(
-  cost = rnorm(200, 550, 100),
-  effect = rnorm(200, 0.3, 0.06),
-  group = "treatment"
-)
-
-df <- rbind(control, treatment)
+trial <- simulate_ce_trial(n = 200, seed = 123)
+head(trial)
 ```
 
-### Run Cost-Effectiveness Analysis
+## Observed Cost-Effectiveness Summary
 
 ```{r}
-res_cea <- CEACT::cea(cost + effect ~ group, data = df, ref = "control")
+res_cea <- cea(cost + effect ~ group, data = trial, ref = "control")
 summary(res_cea)
 ```
 
-### Bootstrap the ICER
+## Bootstrap Uncertainty
 
 ```{r}
-res_boot <- CEACT::boot_icer(cost + effect ~ group, data = df, ref = "control", R = 300)
+set.seed(42)
+res_boot <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
+                      R = 500, ci.type = "perc")
 summary(res_boot)
 ```
 
-### Visualize the Cost-Effectiveness Plane
+## Cost-Effectiveness Plane
 
 ```{r}
-CEACT::plot_ceplane(res_boot, k = 1000)
+plot_ceplane(res_boot, k = 20000)
 ```
 
-### Plot the CEAC
+## Net Monetary Benefit and CEAC
 
 ```{r}
-CEACT::plot_ceac(res_boot, wtp_range = seq(0, 20000, 1000))
+ceac_table <- compute_nmb_ceac(res_boot, wtp_range = seq(0, 50000, 5000))
+head(ceac_table)
+plot_ceac(ceac_table)
 ```
 
-### Compute NMB and CEAC Table
+## Deterministic Sensitivity Analysis
 
 ```{r}
-nmb_table <- CEACT::compute_nmb_ceac(cost + effect ~ 1, data = df, wtp_range = seq(0, 20000, 1000))
-head(nmb_table)
+dsa_result <- dsa_icer(cost + effect ~ group, data = trial,
+                       param = "effect",
+                       range = seq(0.74, 0.82, 0.02),
+                       ref = "control",
+                       metric = "INMB",
+                       k = 20000)
+dsa_result
+plot_tornado(dsa_result, metric = "INMB")
 ```
 
----
+## Real Trial-Based CEA Dataset
 
-## Feedback & Contributions
+CEACT also includes `trial_cea`, a 500-patient example dataset with treatment,
+total cost, and QALY outcomes used in teaching material for trial-based economic
+evaluation.
 
-We welcome feedback, issues, and pull requests.  
-Contribute via the [GitHub Issues page](https://github.com/ielbadisy/CEACT/issues).
+```{r}
+data("trial_cea")
+real_res <- cea(cost + qaly ~ group, data = trial_cea, ref = "control")
+summary(real_res)
+```
 
----
+## Package Quality
 
-## TODO
-
-- [x] Formula-based interface across all functions
-- [x] Optional quadrant labels in CE plane
-- [x] Improved p-value formatting
-- [x] Complete function-level documentation using **roxygen2**
-- [x] Fix warnings and notes
-- [ ] Add unit tests using **testthat**
-- [ ] Create a PDF vignette (theory + practical examples)
-- [ ] Write a comprehensive tutorial (or use-case article ?)
-- [ ] Submit to **CRAN**
-
----
-
-
+- Unit tests are implemented with **testthat**.
+- Function documentation is generated with **roxygen2**.
+- A PDF-capable vignette is available in `vignettes/`.
+- The package source builds and checks successfully with `R CMD check`.

@@ -2,50 +2,32 @@
 % Please edit documentation in R/cea.R
 \name{cea}
 \alias{cea}
-\title{Cost-Effectiveness Analysis Summary (Observed)}
+\title{Cost-Effectiveness Analysis Summary for a Two-Arm Trial}
 \usage{
 cea(formula, data, ref, na.omit = TRUE)
 }
 \arguments{
-\item{formula}{A formula of the form \code{cost + effect ~ group}, where:
-\itemize{
-\item \code{cost} is the numeric column for cost,
-\item \code{effect} is the numeric column for effectiveness or utility (e.g., QALYs),
-\item \code{group} is a grouping variable with at least two levels.
-}}
+\item{formula}{A formula of the form \code{cost + effect ~ group}.}
 
 \item{data}{A data frame containing the variables used in the formula.}
 
-\item{ref}{A character string specifying the reference group in the \code{group} variable (typically "control").}
+\item{ref}{Character string specifying the reference group.}
 
-\item{na.omit}{Logical; whether to remove rows with missing values. Default is \code{TRUE}.}
+\item{na.omit}{Logical; whether to remove rows with missing values.}
 }
 \value{
-An object of class \code{cea}, which is a data frame with the following columns:
-\describe{
-\item{Outcome}{"Mean Cost" or "Mean Effect"}
-\item{Control}{Mean and SD for the control group}
-\item{Treatment}{Mean and SD for the treatment group}
-\item{Delta}{Difference between treatment and control}
-\item{CI}{95\% confidence interval for the difference}
-\item{p.value}{P-value from a t-test comparing groups}
-}
-The object also contains attributes for the ICER, formula, reference group, and matched call.
+An object of class \code{cea}, a data frame with group means, standard
+deviations, differences, confidence intervals, and p-values. Attributes
+include \code{ICER}, \code{delta_cost}, \code{delta_effect}, \code{formula}, \code{ref}, and \code{call}.
 }
 \description{
-Computes observed summary statistics for a cost-effectiveness analysis comparing two groups
-(typically control and treatment). This includes mean and standard deviation of cost and effect,
-differences (deltas), confidence intervals, p-values from t-tests, and the Incremental Cost-Effectiveness Ratio (ICER).
+Computes observed cost-effectiveness summaries comparing one treatment group
+with one reference group. The incremental cost-effectiveness ratio is
+\code{ICER = (mean(cost_treatment) - mean(cost_reference)) / (mean(effect_treatment) - mean(effect_reference))}.
 }
 \examples{
-set.seed(123)
-df <- data.frame(
-  cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-  effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  group = rep(c("control", "treatment"), each = 100)
-)
+df <- simulate_ce_trial(n = 100, seed = 123)
 res <- cea(cost + effect ~ group, data = df, ref = "control")
-print(res)
 summary(res)
 
 }
