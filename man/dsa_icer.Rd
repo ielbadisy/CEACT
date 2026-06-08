@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa_icer.R
 \name{dsa_icer}
 \alias{dsa_icer}
-\title{Perform Deterministic Sensitivity Analysis on ICER or NMB}
+\title{Deterministic Sensitivity Analysis for ICER or INMB}
 \usage{
 dsa_icer(formula, data, param, range, ref, metric = "ICER", k = 1000)
 }
@@ -11,30 +11,29 @@ dsa_icer(formula, data, param, range, ref, metric = "ICER", k = 1000)
 
 \item{data}{A data frame.}
 
-\item{param}{Name of the parameter to vary (e.g., "effect").}
+\item{param}{Name of the variable to vary, usually the cost or effect
+variable from \code{formula}.}
 
-\item{range}{A numeric vector of values for the parameter (e.g., seq(0.6, 0.8, 0.01)).}
+\item{range}{Numeric vector of values assigned to the treatment arm.}
 
-\item{ref}{Character string specifying the reference group (e.g., "control").}
+\item{ref}{Reference group label.}
 
-\item{metric}{Character string: either "ICER" or "NMB".}
+\item{metric}{Either \code{"ICER"} or \code{"INMB"}. \code{"NMB"} is accepted as an alias
+for \code{"INMB"}.}
 
-\item{k}{Willingness-to-pay threshold (required for NMB).}
+\item{k}{Willingness-to-pay threshold used for INMB.}
 }
 \value{
-A data frame with the parameter values and resulting ICER or NMB.
+A data frame with varied parameter values and resulting metric.
 }
 \description{
-This function varies a single parameter in the treatment group while keeping all others fixed,
-and computes the resulting Incremental Cost-Effectiveness Ratio (ICER) or Net Monetary Benefit (NMB).
+Varies one treatment-arm parameter while holding observed reference-arm data
+fixed, then recomputes the ICER or incremental net monetary benefit.
 }
 \examples{
-df <- data.frame(
-  cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-  effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  group = rep(c("control", "treatment"), each = 100)
-)
-
-dsa_result <- dsa_icer(cost + effect ~ group, data = df, param = "effect",
-                       range = seq(0.6, 0.7, 0.01), ref = "control", metric = "ICER")
+df <- simulate_ce_trial(n = 100, seed = 123)
+dsa <- dsa_icer(cost + effect ~ group, data = df, param = "effect",
+                range = seq(0.74, 0.82, 0.02), ref = "control",
+                metric = "INMB", k = 20000)
+head(dsa)
 }

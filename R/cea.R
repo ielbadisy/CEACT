@@ -1,125 +1,89 @@
-#' Cost-Effectiveness Analysis Summary (Observed)
+#' Cost-Effectiveness Analysis Summary for a Two-Arm Trial
 #'
-#' Computes observed summary statistics for a cost-effectiveness analysis comparing two groups 
-#' (typically control and treatment). This includes mean and standard deviation of cost and effect, 
-#' differences (deltas), confidence intervals, p-values from t-tests, and the Incremental Cost-Effectiveness Ratio (ICER).
+#' Computes observed cost-effectiveness summaries comparing one treatment group
+#' with one reference group. The incremental cost-effectiveness ratio is
+#' `ICER = (mean(cost_treatment) - mean(cost_reference)) /
+#' (mean(effect_treatment) - mean(effect_reference))`.
 #'
-#' @param formula A formula of the form `cost + effect ~ group`, where:
-#'   - `cost` is the numeric column for cost,
-#'   - `effect` is the numeric column for effectiveness or utility (e.g., QALYs),
-#'   - `group` is a grouping variable with at least two levels.
+#' @param formula A formula of the form `cost + effect ~ group`.
 #' @param data A data frame containing the variables used in the formula.
-#' @param ref A character string specifying the reference group in the `group` variable (typically "control").
-#' @param na.omit Logical; whether to remove rows with missing values. Default is `TRUE`.
+#' @param ref Character string specifying the reference group.
+#' @param na.omit Logical; whether to remove rows with missing values.
 #'
-#' @return An object of class `cea`, which is a data frame with the following columns:
-#' \describe{
-#'   \item{Outcome}{"Mean Cost" or "Mean Effect"}
-#'   \item{Control}{Mean and SD for the control group}
-#'   \item{Treatment}{Mean and SD for the treatment group}
-#'   \item{Delta}{Difference between treatment and control}
-#'   \item{CI}{95% confidence interval for the difference}
-#'   \item{p.value}{P-value from a t-test comparing groups}
-#' }
-#' The object also contains attributes for the ICER, formula, reference group, and matched call.
+#' @return An object of class `cea`, a data frame with group means, standard
+#'   deviations, differences, confidence intervals, and p-values. Attributes
+#'   include `ICER`, `delta_cost`, `delta_effect`, `formula`, `ref`, and `call`.
 #'
 #' @examples
-#' set.seed(123)
-#' df <- data.frame(
-#'   cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-#'   effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-#'   group = rep(c("control", "treatment"), each = 100)
-#' )
+#' df <- simulate_ce_trial(n = 100, seed = 123)
 #' res <- cea(cost + effect ~ group, data = df, ref = "control")
-#' print(res)
 #' summary(res)
 #'
 #' @export
 cea <- function(formula, data, ref, na.omit = TRUE) {
-  terms_obj <- terms(formula)
-  vars <- all.vars(terms_obj)
-  if (length(vars) < 3) stop("Formula must be of the form: cost + effect ~ group")
+  ce_data <- parse_ce_formula(formula, data, ref = ref, require_group = TRUE,
+                              na.omit = na.omit)
 
-  cost   <- vars[1]
-  effect <- vars[2]
-  group  <- vars[3]
+  ctrl_data <- ce_data[ce_data$group == ref, , drop = FALSE]
+  trt_data <- ce_data[ce_data$group != ref, , drop = FALSE]
+  trt_name <- as.character(unique(trt_data$group))
 
-  if (na.omit) data <- na.omit(data)
+  c_mean <- c(reference = mean(ctrl_data$cost), treatment = mean(trt_data$cost))
+  e_mean <- c(reference = mean(ctrl_data$effect), treatment = mean(trt_data$effect))
+  c_sd <- c(reference = stats::sd(ctrl_data$cost), treatment = stats::sd(trt_data$cost))
+  e_sd <- c(reference = stats::sd(ctrl_data$effect), treatment = stats::sd(trt_data$effect))
 
-  data[[group]] <- as.factor(data[[group]])
-  ctrl_data <- data[data[[group]] == ref, ]
-  trt_data  <- data[data[[group]] != ref, ]
-
-  c_mean <- c(mean(ctrl_data[[cost]]), mean(trt_data[[cost]]))
-  e_mean <- c(mean(ctrl_data[[effect]]), mean(trt_data[[effect]]))
-  c_sd   <- c(sd(ctrl_data[[cost]]), sd(trt_data[[cost]]))
-  e_sd   <- c(sd(ctrl_data[[effect]]), sd(trt_data[[effect]]))
-
-  delta_c <- c_mean[2] - c_mean[1]
-  delta_e <- e_mean[2] - e_mean[1]
-  ICER <- delta_c / delta_e
-
-  t_cost <- t.test(trt_data[[cost]], ctrl_data[[cost]])
-  t_eff  <- t.test(trt_data[[effect]], ctrl_data[[effect]])
-  ci <- c(t_cost$conf.int, t_eff$conf.int)
-
-  pvals <- c(t_cost$p.value, t_eff$p.value)
-  pvals_fmt <- ifelse(pvals < 0.001, "<0.001", formatC(pvals, format = "f", digits = 4))
+  deltas <- ce_deltas(ce_data, ref)
+  t_cost <- stats::t.test(trt_data$cost, ctrl_data$cost)
+  t_eff <- stats::t.test(trt_data$effect, ctrl_data$effect)
 
   result_table <- data.frame(
-    Outcome = c("Mean Cost", "Mean Effect"),
-    Control = c(paste0(round(c_mean[1], 2), " (sd ", round(c_sd[1], 2), ")"),
-                paste0(round(e_mean[1], 2), " (sd ", round(e_sd[1], 2), ")")),
-    Treatment = c(paste0(round(c_mean[2], 2), " (sd ", round(c_sd[2], 2), ")"),
-                  paste0(round(e_mean[2], 2), " (sd ", round(e_sd[2], 2), ")")),
-    Delta = round(c(delta_c, delta_e), 3),
-    CI = c(paste0("[", round(ci[1], 2), ";", round(ci[2], 2), "]"),
-           paste0("[", round(ci[3], 2), ";", round(ci[4], 2), "]")),
-    p.value = pvals_fmt,
+    Outcome = c("Cost", "Effect"),
+    Reference = c(
+      paste0(round(c_mean[1], 3), " (SD ", round(c_sd[1], 3), ")"),
+      paste0(round(e_mean[1], 3), " (SD ", round(e_sd[1], 3), ")")
+    ),
+    Treatment = c(
+      paste0(round(c_mean[2], 3), " (SD ", round(c_sd[2], 3), ")"),
+      paste0(round(e_mean[2], 3), " (SD ", round(e_sd[2], 3), ")")
+    ),
+    Difference = round(c(deltas["delta_cost"], deltas["delta_effect"]), 3),
+    CI = c(format_interval(t_cost$conf.int), format_interval(t_eff$conf.int)),
+    p.value = c(format_pval(t_cost$p.value), format_pval(t_eff$p.value)),
     stringsAsFactors = FALSE
   )
 
   structure(
     result_table,
-    ICER = round(ICER, 3),
+    ICER = unname(deltas["ICER"]),
+    delta_cost = unname(deltas["delta_cost"]),
+    delta_effect = unname(deltas["delta_effect"]),
+    treatment = trt_name,
     formula = formula,
     ref = ref,
     call = match.call(),
-    class = "cea"
+    class = c("cea", "data.frame")
   )
 }
 
 #' @export
 summary.cea <- function(object, ...) {
   cat("Cost-Effectiveness Summary\n")
-  cat("Formula: ", deparse(attr(object, "formula")), "\n")
-  cat("Reference Group: ", attr(object, "ref"), "\n")
-  cat("ICER:", attr(object, "ICER"), "\n\n")
-
-  df <- as.data.frame(unclass(object))  # ensure it is printed correctly
-  print(df)
+  cat("Formula: ", deparse(attr(object, "formula")), "\n", sep = "")
+  cat("Reference group: ", attr(object, "ref"), "\n", sep = "")
+  cat("Treatment group: ", attr(object, "treatment"), "\n", sep = "")
+  cat("Incremental cost: ", round(attr(object, "delta_cost"), 3), "\n", sep = "")
+  cat("Incremental effect: ", round(attr(object, "delta_effect"), 3), "\n", sep = "")
+  cat("ICER: ", round(attr(object, "ICER"), 3), "\n\n", sep = "")
+  print(as.data.frame(object))
   invisible(object)
 }
-
 
 #' @export
 print.cea <- function(x, ...) {
   cat("Cost-Effectiveness Analysis Result\n")
-  cat("Use `summary()` for details.\n")
+  cat("Reference: ", attr(x, "ref"), "; treatment: ", attr(x, "treatment"), "\n",
+      sep = "")
+  cat("ICER: ", round(attr(x, "ICER"), 3), "\n", sep = "")
   invisible(x)
 }
-
-#*******************************************************************************
-
-# simulate example data
-#set.seed(123)
-#df <- data.frame(
-  #cost = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-  #effect = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  #group = rep(c("control", "treatment"), each = 100)
-#)
-
-#res <- cea(cost + effect ~ group, data = df, ref = "control")
-
-#print(res)
-#summary(res)

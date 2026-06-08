@@ -3,27 +3,25 @@
 \name{plot_ceplane}
 \alias{plot_ceplane}
 \title{Plot Cost-Effectiveness Plane}
+\usage{
+plot_ceplane(boot_icer_result, k = NULL, subtitle = NULL)
+}
 \arguments{
 \item{boot_icer_result}{A \code{boot_icer} object from \code{\link[=boot_icer]{boot_icer()}}.}
 
-\item{k}{Optional slope (willingness-to-pay threshold).}
+\item{k}{Optional willingness-to-pay threshold shown as a straight line with
+slope \code{k}.}
 
 \item{subtitle}{Optional subtitle text.}
 }
 \value{
-A \code{ggplot} object displaying the cost-effectiveness plane.
+A \code{ggplot} object.
 }
 \description{
-This function visualizes the cost-effectiveness plane, showing incremental costs vs effects
-from the bootstrap distribution.
+Visualizes bootstrap replicates of incremental cost and incremental effect.
 }
 \examples{
-set.seed(123)
-df <- data.frame(
-  c = c(rnorm(100, 500, 100), rnorm(100, 600, 120)),
-  e = c(rnorm(100, 0.6, 0.05), rnorm(100, 0.65, 0.06)),
-  g = rep(c("control", "treatment"), each = 100)
-)
-res <- boot_icer(c + e ~ g, data = df, ref = "control", R = 300)
-plot_ceplane(res, k = 1000)
+df <- simulate_ce_trial(n = 100, seed = 123)
+res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
+plot_ceplane(res, k = 20000)
 }

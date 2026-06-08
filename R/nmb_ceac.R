@@ -1,73 +1,69 @@
-#' Compute Net Monetary Benefit (NMB) and CEAC Table
+#' Compute Net Monetary Benefit and CEAC Table
 #'
-#' Computes the expected Net Monetary Benefit (ENMB) and the probability of cost-effectiveness
-#' for a range of Willingness-To-Pay (WTP) thresholds. This function is useful for generating
-#' Cost-Effectiveness Acceptability Curves (CEAC).
+#' Computes expected incremental net monetary benefit (INMB) and the probability
+#' that treatment is cost-effective across willingness-to-pay thresholds. For a
+#' two-arm trial, `INMB(k) = k * DeltaEffect - DeltaCost`.
 #'
-#' @param formula A formula of the form `cost + effect ~ 1`, where:
-#'   - `cost` is the numeric column for cost,
-#'   - `effect` is the numeric column for effectiveness (e.g., QALYs).
-#'   The right-hand side `~ 1` is ignored but required for consistency.
-#' @param data A data frame containing the variables used in the formula.
-#' @param wtp_range A numeric vector of WTP thresholds (e.g., `seq(0, 100000, 1000)`).
+#' @param x Either a `boot_icer` object or a formula of the form
+#'   `cost + effect ~ group`.
+#' @param data Data frame required when `x` is a formula.
+#' @param wtp_range Numeric vector of willingness-to-pay thresholds.
+#' @param ref Reference group label required when `x` is a formula.
+#' @param R Number of bootstrap replications used when `x` is a formula.
+#' @param ... Additional arguments passed to [boot_icer()] for formula input.
 #'
-#' @return An object of class `"nmb_ceac"`, which is a `data.frame` with columns:
-#' \describe{
-#'   \item{WTP}{Willingness-to-pay threshold}
-#'   \item{ENMB}{Expected Net Monetary Benefit at each WTP}
-#'   \item{Prob_CE}{Probability of being cost-effective at each WTP}
-#' }
-#' The object also contains the original formula as an attribute.
+#' @return An object of class `"nmb_ceac"` with columns `WTP`, `ENMB`, and
+#'   `Prob_CE`.
 #'
 #' @examples
-#' set.seed(123)
-#' df <- data.frame(
-#'   c = rnorm(100, 500, 100),
-#'   e = rnorm(100, 0.6, 0.05)
-#' )
-#' ceac_tbl <- compute_nmb_ceac(c + e ~ 1, data = df, wtp_range = seq(0, 2000, 200))
-#' summary(ceac_tbl)
+#' df <- simulate_ce_trial(n = 100, seed = 123)
+#' ceac_tbl <- compute_nmb_ceac(cost + effect ~ group, data = df,
+#'                              ref = "control", R = 200,
+#'                              wtp_range = seq(0, 50000, 5000))
+#' head(ceac_tbl)
 #'
 #' @export
-compute_nmb_ceac <- function(formula, data, wtp_range = seq(0, 100000, 1000)) {
-  terms_obj <- terms(formula)
-  vars <- all.vars(terms_obj)
-
-  if (length(vars) < 2) {
-    stop("Formula must contain at least two variables on the left-hand side (e.g., cost + effect ~ 1)")
+compute_nmb_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
+                             ref = NULL, R = 1000, ...) {
+  if (inherits(x, "boot_icer")) {
+    boot_dist <- x$boot_dist
+    observed <- x$observed
+    formula <- x$formula
+  } else if (inherits(x, "formula")) {
+    if (is.null(data)) stop("`data` must be supplied when `x` is a formula.")
+    if (is.null(ref)) stop("`ref` must be supplied when `x` is a formula.")
+    boot_obj <- boot_icer(x, data = data, ref = ref, R = R, ...)
+    boot_dist <- boot_obj$boot_dist
+    observed <- boot_obj$observed
+    formula <- x
+  } else {
+    stop("`x` must be a `boot_icer` object or formula.", call. = FALSE)
   }
 
-  cost   <- vars[1]
-  effect <- vars[2]
+  delta_cost <- boot_dist[, 1]
+  delta_effect <- boot_dist[, 2]
+  observed_dc <- observed[1]
+  observed_de <- observed[2]
 
-  cost_vals   <- data[[cost]]
-  effect_vals <- data[[effect]]
-
-  ENMB <- vapply(wtp_range, function(wtp) mean(wtp * effect_vals - cost_vals), numeric(1))
-  Prob_CE <- vapply(wtp_range, function(wtp) mean((wtp * effect_vals - cost_vals) > 0), numeric(1))
-
-  out <- data.frame(WTP = wtp_range, ENMB = ENMB, Prob_CE = Prob_CE)
+  out <- data.frame(
+    WTP = wtp_range,
+    ENMB = wtp_range * observed_de - observed_dc,
+    Prob_CE = vapply(
+      wtp_range,
+      function(k) mean(k * delta_effect - delta_cost > 0, na.rm = TRUE),
+      numeric(1)
+    )
+  )
   attr(out, "formula") <- formula
   class(out) <- c("nmb_ceac", "data.frame")
-  return(out)
+  out
 }
-
 
 #' @export
 summary.nmb_ceac <- function(object, ...) {
-  cat("Net Monetary Benefit (NMB) Summary\n")
-  cat("Formula: ", deparse(attr(object, "formula")), "\n")
-  cat("WTP Range: ", min(object$WTP), "to", max(object$WTP), "\n\n")
-  print(head(object, 10))
+  cat("Net Monetary Benefit and CEAC Summary\n")
+  cat("Formula: ", deparse(attr(object, "formula")), "\n", sep = "")
+  cat("WTP range: ", min(object$WTP), " to ", max(object$WTP), "\n\n", sep = "")
+  print(utils::head(object, 10))
+  invisible(object)
 }
-
-#*******************************************************************************
-
-## example
-#df <- data.frame(
-  #c = rnorm(100, 500, 100),
-  #e = rnorm(100, 0.6, 0.05)
-#)
-#ceac_tbl <- compute_nmb_ceac(c + e ~ 1, data = df, wtp_range = seq(0, 2000, 200))
-#summary(ceac_tbl)
-

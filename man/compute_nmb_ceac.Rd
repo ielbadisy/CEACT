@@ -2,43 +2,45 @@
 % Please edit documentation in R/nmb_ceac.R
 \name{compute_nmb_ceac}
 \alias{compute_nmb_ceac}
-\title{Compute Net Monetary Benefit (NMB) and CEAC Table}
+\title{Compute Net Monetary Benefit and CEAC Table}
 \usage{
-compute_nmb_ceac(formula, data, wtp_range = seq(0, 1e+05, 1000))
+compute_nmb_ceac(
+  x,
+  data = NULL,
+  wtp_range = seq(0, 1e+05, 1000),
+  ref = NULL,
+  R = 1000,
+  ...
+)
 }
 \arguments{
-\item{formula}{A formula of the form \code{cost + effect ~ 1}, where:
-\itemize{
-\item \code{cost} is the numeric column for cost,
-\item \code{effect} is the numeric column for effectiveness (e.g., QALYs).
-The right-hand side \code{~ 1} is ignored but required for consistency.
-}}
+\item{x}{Either a \code{boot_icer} object or a formula of the form
+\code{cost + effect ~ group}.}
 
-\item{data}{A data frame containing the variables used in the formula.}
+\item{data}{Data frame required when \code{x} is a formula.}
 
-\item{wtp_range}{A numeric vector of WTP thresholds (e.g., \code{seq(0, 100000, 1000)}).}
+\item{wtp_range}{Numeric vector of willingness-to-pay thresholds.}
+
+\item{ref}{Reference group label required when \code{x} is a formula.}
+
+\item{R}{Number of bootstrap replications used when \code{x} is a formula.}
+
+\item{...}{Additional arguments passed to \code{\link[=boot_icer]{boot_icer()}} for formula input.}
 }
 \value{
-An object of class \code{"nmb_ceac"}, which is a \code{data.frame} with columns:
-\describe{
-\item{WTP}{Willingness-to-pay threshold}
-\item{ENMB}{Expected Net Monetary Benefit at each WTP}
-\item{Prob_CE}{Probability of being cost-effective at each WTP}
-}
-The object also contains the original formula as an attribute.
+An object of class \code{"nmb_ceac"} with columns \code{WTP}, \code{ENMB}, and
+\code{Prob_CE}.
 }
 \description{
-Computes the expected Net Monetary Benefit (ENMB) and the probability of cost-effectiveness
-for a range of Willingness-To-Pay (WTP) thresholds. This function is useful for generating
-Cost-Effectiveness Acceptability Curves (CEAC).
+Computes expected incremental net monetary benefit (INMB) and the probability
+that treatment is cost-effective across willingness-to-pay thresholds. For a
+two-arm trial, \code{INMB(k) = k * DeltaEffect - DeltaCost}.
 }
 \examples{
-set.seed(123)
-df <- data.frame(
-  c = rnorm(100, 500, 100),
-  e = rnorm(100, 0.6, 0.05)
-)
-ceac_tbl <- compute_nmb_ceac(c + e ~ 1, data = df, wtp_range = seq(0, 2000, 200))
-summary(ceac_tbl)
+df <- simulate_ce_trial(n = 100, seed = 123)
+ceac_tbl <- compute_nmb_ceac(cost + effect ~ group, data = df,
+                             ref = "control", R = 200,
+                             wtp_range = seq(0, 50000, 5000))
+head(ceac_tbl)
 
 }
