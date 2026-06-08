@@ -1,11 +1,13 @@
 ---
-title: "Trial-Based Cost-Effectiveness Analysis with CEACT"
+title: "Cost-Effectiveness Analysis for Clinical Trials with CEACT"
 author: "Imad EL BADISY"
 output:
   pdf_document:
     toc: true
     number_sections: true
 bibliography: references.bib
+header-includes:
+  - \usepackage{float}
 vignette: >
   %\VignetteIndexEntry{Trial-Based Cost-Effectiveness Analysis with CEACT}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,6 +20,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 6.5,
   fig.height = 4.2,
+  fig.pos = "H",
   dpi = 120
 )
 library(CEACT)
@@ -25,15 +28,13 @@ library(CEACT)
 
 # Overview
 
-CEACT implements core trial-based cost-effectiveness analyses for two-arm
-clinical trials: observed incremental summaries, non-parametric bootstrap
+CEACT implements cost-effectiveness analyses for two-arm clinical trials: observed incremental summaries, non-parametric bootstrap
 uncertainty, cost-effectiveness planes, cost-effectiveness acceptability curves
 (CEACs), net monetary benefit, and deterministic sensitivity analysis.
 
-The package follows standard practice in trial-based economic evaluation, where
-patient-level costs and effects are observed alongside treatment allocation
-[@glick2014economic; @drummond2015methods]. Let $C_i$ denote cost, $E_i$ denote
-effect, and $A_i \in \{0,1\}$ denote treatment assignment, with $A_i=0$ for the
+The package follows standard practice in trial-based economic evaluation, where patient-level costs and effects are observed alongside treatment allocation [@glick2014economic; @drummond2015methods]. 
+
+Let $C_i$ denote cost, $E_i$ denote effect, and $A_i \in \{0,1\}$ denote treatment assignment, with $A_i=0$ for the
 reference group and $A_i=1$ for treatment.
 
 # Core Quantities
@@ -60,30 +61,23 @@ When $\Delta E \ne 0$, the incremental cost-effectiveness ratio is
 ICER = \frac{\Delta C}{\Delta E}.
 \]
 
-Because ratios can be unstable when $\Delta E$ is near zero, CEACT also uses net
-monetary benefit at willingness-to-pay threshold $k$ [@stinnett1998net]:
+Because ratios can be unstable when $\Delta E$ is near zero, CEACT also uses net monetary benefit at willingness-to-pay threshold $k$ [@stinnett1998net]:
 
 \[
 INMB(k) = k\Delta E - \Delta C.
 \]
 
-Treatment is cost-effective at threshold $k$ when $INMB(k)>0$. The CEAC is the
-probability of this event over an uncertainty distribution:
+Treatment is cost-effective at threshold $k$ when $INMB(k)>0$. The CEAC is the probability of this event over an uncertainty distribution:
 
 \[
 CEAC(k) = Pr\{k\Delta E - \Delta C > 0\}.
 \]
 
-CEACT estimates this probability from non-parametric bootstrap replicates
-[@efron1993introduction], preserving treatment-arm sample sizes by stratified
-resampling. CEACs and planes are widely used to communicate decision uncertainty
-in cost-effectiveness studies [@fenwick2001representing; @briggs2002thinking].
+CEACT estimates this probability from non-parametric bootstrap replicates [@efron1993introduction], preserving treatment-arm sample sizes by stratified resampling. CEACs and planes are widely used to communicate decision uncertainty in cost-effectiveness studies [@fenwick2001representing; @briggs2002thinking].
 
 # Real Trial-Based CEA Example
 
-The example below first uses the `trial_cea` dataset included with CEACT. This
-patient-level dataset contains treatment assignment, total costs, and QALYs for
-500 trial participants and is suitable for demonstrating the package workflow.
+The example below first uses the `trial_cea` dataset included with CEACT package. This patient-level dataset contains treatment assignment, total costs, and QALYs for 500 trial participants and is suitable for demonstrating the package workflow.
 
 ```{r data}
 data("trial_cea")
@@ -97,8 +91,7 @@ observed <- cea(cost + qaly ~ group, data = trial, ref = "control")
 summary(observed)
 ```
 
-The observed treatment arm produces more QALYs with a small increase in mean
-cost. The ICER is the additional cost per additional QALY.
+The observed treatment arm produces more QALYs with a small increase in mean cost. The ICER is the additional cost per additional QALY.
 
 # Bootstrap Uncertainty
 
@@ -109,17 +102,14 @@ boot_res <- boot_icer(cost + qaly ~ group, data = trial, ref = "control",
 summary(boot_res)
 ```
 
-The bootstrap distribution summarizes sampling uncertainty in $\Delta C$,
-$\Delta E$, and the ICER. For publication-quality analyses, the number of
-replications should generally be increased beyond this vignette if computation
-time allows [@willan2006statistical].
+The bootstrap distribution summarizes sampling uncertainty in $\Delta C$, $\Delta E$, and the ICER. For publication-quality analyses, the number of
+replications should generally be increased beyond this vignette if computation time allows [@willan2006statistical].
 
 ```{r plane, fig.cap="Cost-effectiveness plane from stratified non-parametric bootstrap replicates. The red line is the willingness-to-pay threshold."}
 plot_ceplane(boot_res, k = 20000)
 ```
 
-Most simulated replicates lie in the north-east quadrant, indicating higher cost
-and higher effect for treatment. Replicates below the threshold line are
+Most simulated replicates lie in the north-east quadrant, indicating higher cost and higher effect for treatment. Replicates below the threshold line are
 cost-effective at that threshold.
 
 # Net Monetary Benefit and CEAC
@@ -137,10 +127,8 @@ ceac_tbl
 plot_ceac(ceac_tbl)
 ```
 
-The CEAC rises as the willingness-to-pay threshold increases because the
-treatment's positive incremental effect receives more decision value. The curve
-should be interpreted as decision uncertainty, not as the expected size of the
-health benefit.
+The CEAC rises as the willingness-to-pay threshold increases because the treatment's positive incremental effect receives more decision value. The curve
+should be interpreted as decision uncertainty, not as the expected size of the health benefit.
 
 # Deterministic Sensitivity Analysis
 
@@ -158,21 +146,23 @@ dsa_effect <- dsa_icer(
 dsa_effect
 ```
 
-```{r tornado, fig.cap="One-way deterministic sensitivity analysis varying treatment-arm effect."}
+```{r tornado, fig.cap="One-way deterministic sensitivity analysis varying treatment-arm effect.", fig.height=3.6}
 plot_tornado(dsa_effect, metric = "INMB")
 ```
 
-This one-way analysis shows how the incremental net monetary benefit changes as
-the assumed treatment-arm effect changes. Such analyses are useful for checking
-which assumptions drive conclusions, but they do not replace probabilistic
-uncertainty analysis.
+This one-way analysis shows how the incremental net monetary benefit changes as the assumed treatment-arm effect changes. Such analyses are useful for checking which assumptions drive conclusions, but they do not replace probabilistic uncertainty analysis.
 
 # Reproducibility Checklist
 
 - Define the reference and treatment arms before analysis.
+
 - Report $\Delta C$, $\Delta E$, ICER, and INMB at relevant thresholds.
+
 - Use bootstrap or model-based uncertainty methods for CEACs.
+
 - Interpret ICERs alongside the cost-effectiveness plane and net benefit.
+
 - Report the willingness-to-pay thresholds used for decision interpretation.
+
 
 # References
