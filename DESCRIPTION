@@ -12,12 +12,12 @@ Authors@R:
       role = c("aut", "cre")
     )
 Description: 
-    CEACT (Cost-Effectiveness Analysis Toolkit for Clinical Trials) is a comprehensive R package 
-    designed to facilitate the economic evaluation of healthcare interventions in clinical trial settings. 
-    It provides tools to compute and visualize Incremental Cost-Effectiveness Ratios (ICERs), 
-    Cost-Effectiveness Acceptability Curves (CEAC), Cost-Effectiveness Planes, 
-    and Net Monetary Benefit (NMB) tables. The package streamlines cost-utility analyses 
-    and supports both observed and bootstrap-based approaches.
+    Provides tools for trial-based economic evaluation of healthcare interventions. 
+    Computes and visualizes incremental cost-effectiveness ratios, 
+    cost-effectiveness acceptability curves, cost-effectiveness planes, 
+    net monetary benefit tables, and one-way deterministic sensitivity analyses. 
+    Supports cost-utility analyses using observed summaries and non-parametric 
+    bootstrap uncertainty.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

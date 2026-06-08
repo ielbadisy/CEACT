@@ -79,5 +79,9 @@ test_that("dsa_icer and plot functions return expected objects", {
   expect_equal(names(dsa), c("Parameter", "INMB"))
   expect_s3_class(plot_ceplane(boot_res, k = 20000), "ggplot")
   expect_s3_class(plot_ceac(boot_res, wtp_range = c(0, 10000)), "ggplot")
-  expect_s3_class(plot_tornado(dsa, metric = "INMB"), "ggplot")
+  expect_s3_class(plot_dsa(dsa, metric = "INMB"), "ggplot")
+  expect_warning(
+    expect_s3_class(plot_tornado(dsa, metric = "INMB"), "ggplot"),
+    "deprecated"
+  )
 })

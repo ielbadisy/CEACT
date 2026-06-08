@@ -146,8 +146,8 @@ dsa_effect <- dsa_icer(
 dsa_effect
 ```
 
-```{r tornado, fig.cap="One-way deterministic sensitivity analysis varying treatment-arm effect.", fig.height=3.6}
-plot_tornado(dsa_effect, metric = "INMB")
+```{r one-way-dsa-plot, fig.cap="One-way deterministic sensitivity analysis varying treatment-arm effect.", fig.height=3.6}
+plot_dsa(dsa_effect, metric = "INMB")
 ```
 
 This one-way analysis shows how the incremental net monetary benefit changes as the assumed treatment-arm effect changes. Such analyses are useful for checking which assumptions drive conclusions, but they do not replace probabilistic uncertainty analysis.
