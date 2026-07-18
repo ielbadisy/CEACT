@@ -3,15 +3,20 @@ CEACT Package
 
 ## Overview
 
-**CEACT** *(Cost-Effectiveness Analysis Toolkit for Clinical Trials)* is
-an R package for two-arm trial-based economic evaluation. It implements
-a formula-based workflow for:
+**CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R
+package for two-arm trial-based economic evaluation. It implements a
+formula-based workflow for:
 
 - observed incremental cost, incremental effect, and ICER summaries;
+
 - stratified non-parametric bootstrap uncertainty;
+
 - incremental net monetary benefit (INMB);
+
 - cost-effectiveness acceptability curves (CEACs);
+
 - cost-effectiveness planes;
+
 - one-way deterministic sensitivity analysis.
 
 CEACT is intended for individual-level clinical-trial datasets with one
@@ -121,12 +126,12 @@ dsa_result
 #> 3      0.78  479.79316
 #> 4      0.80  879.79316
 #> 5      0.82 1279.79316
-plot_tornado(dsa_result, metric = "INMB")
+plot_dsa(dsa_result, metric = "INMB")
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-## Real Trial-Based CEA Dataset
+## Trial-Based CEA Dataset
 
 CEACT also includes `trial_cea`, a 500-patient example dataset with
 treatment, total cost, and QALY outcomes used in teaching material for
@@ -155,6 +160,9 @@ summary(real_res)
 ## Package Quality
 
 - Unit tests are implemented with **testthat**.
+
 - Function documentation is generated with **roxygen2**.
-- A PDF-capable vignette is available in `vignettes/`.
+
+- A PDF vignette is available in `vignettes/`.
+
 - The package source builds and checks successfully with `R CMD check`.
