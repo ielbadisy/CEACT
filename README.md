@@ -157,6 +157,32 @@ summary(real_res)
 #> delta_effect     [0.005; 0.08]  0.0251
 ```
 
+## Citation
+
+Use the following citation for publications that reference CEACT:
+
+``` r
+citation("CEACT")
+```
+
+> To cite package 'CEACT' in publications use:
+>
+>   EL BADISY I (2026). _CEACT: Cost-Effectiveness Analysis Toolkit for
+>   Clinical Trials_. R package version 0.5.0,
+>   <https://CRAN.R-project.org/package=CEACT>.
+
+BibTeX entry for LaTeX users:
+
+``` bibtex
+@Manual{,
+  title = {CEACT: Cost-Effectiveness Analysis Toolkit for Clinical Trials},
+  author = {Imad {EL BADISY}},
+  year = {2026},
+  note = {R package version 0.5.0},
+  url = {https://CRAN.R-project.org/package=CEACT},
+}
+```
+
 ## Package Quality
 
 - Unit tests are implemented with **testthat**.
