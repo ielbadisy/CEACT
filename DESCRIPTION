@@ -2,12 +2,12 @@ Package: CEACT
 Type: Package
 Title: Cost-Effectiveness Analysis Toolkit for Clinical Trials
 Version: 0.5.0
-Author: Imad EL BADISY [aut, cre]
-Maintainer: Imad EL BADISY <elbadisyimad@gmail.com>
+Author: Imad El Badisy [aut, cre]
+Maintainer: Imad El Badisy <elbadisyimad@gmail.com>
 Authors@R: 
     person(
       given = "Imad",
-      family = "EL BADISY",
+      family = "El Badisy",
       email = "elbadisyimad@gmail.com",
       role = c("aut", "cre")
     )
