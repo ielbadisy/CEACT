@@ -1,6 +1,8 @@
 CEACT Package
 ================
 
+[![CRAN status](https://www.r-pkg.org/badges/version/CEACT)](https://CRAN.R-project.org/package=CEACT)
+
 ## Overview
 
 **CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R

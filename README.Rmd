@@ -7,6 +7,8 @@ output: github_document
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
 ```
 
+[![CRAN status](https://www.r-pkg.org/badges/version/CEACT)](https://CRAN.R-project.org/package=CEACT)
+
 ## Overview
 
 **CEACT** *(Cost-Effectiveness Analysis for Clinical Trials)* is an R package for two-arm trial-based economic evaluation. It implements a formula-based workflow for:
