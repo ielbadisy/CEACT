@@ -1,7 +1,7 @@
 Package: CEACT
 Type: Package
 Title: Cost-Effectiveness Analysis Toolkit for Clinical Trials
-Version: 0.5.0
+Version: 0.6.0
 Author: Imad El Badisy [aut, cre]
 Maintainer: Imad El Badisy <elbadisyimad@gmail.com>
 Authors@R: 
@@ -17,7 +17,9 @@ Description:
     cost-effectiveness acceptability curves, cost-effectiveness planes, 
     net monetary benefit tables, and one-way deterministic sensitivity analyses. 
     Supports cost-utility analyses using observed summaries and non-parametric 
-    bootstrap uncertainty.
+    bootstrap uncertainty, and multiply imputed data through Rubin's rules
+    (Rubin 1987, ISBN:9780471087052) or bootstrap-then-impute resampling
+    (Brand et al. 2019 <doi:10.1002/sim.7956>).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -29,8 +31,11 @@ Depends:
     R (>= 3.5.0)
 Imports:
     ggplot2,
-    boot
+    boot,
+    parallel
 Suggests:
+    mice,
+    mimar,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
