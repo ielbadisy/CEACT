@@ -1,16 +1,21 @@
+## Update submission (0.5.0 -> 0.6.0)
+
+This update adds `micea()`, cost-effectiveness analysis on multiply imputed
+data pooled with Rubin's rules, and `miboot()`, bootstrap-then-impute
+resampling. Both accept an optional case-weight column. See NEWS.md.
+
+## Test environments
+
+* Local: Ubuntu 24.04, R 4.5.1
+
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
 
-Checked on:
+* New maintainer: only the casing of the maintainer name changes, from
+  "Imad EL BADISY" to "Imad El Badisy". The person and the email address are
+  the same.
 
-- Ubuntu 24.04.3 LTS, R 4.5.1
+## Reverse dependencies
 
-## Submission notes
-
-This is a new submission.
-
-CEACT provides tools for trial-based cost-effectiveness analysis, including
-incremental cost-effectiveness ratio summaries, bootstrap uncertainty,
-cost-effectiveness acceptability curves, cost-effectiveness planes, net
-monetary benefit, and one-way deterministic sensitivity analysis.
+There are no reverse dependencies on CRAN.
