@@ -4,7 +4,8 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5,
+                      fig.path = "man/figures/README-")
 ```
 
 [![CRAN status](https://www.r-pkg.org/badges/version/CEACT)](https://CRAN.R-project.org/package=CEACT)
@@ -22,16 +23,27 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height
 
 - cost-effectiveness planes;
 
-- one-way deterministic sensitivity analysis.
+- one-way deterministic sensitivity analysis;
+
+- missing cost and effect data, through Rubin's rules on multiply imputed data
+  (`micea()`) or bootstrap-then-impute resampling (`miboot()`).
 
 CEACT is intended for individual-level clinical-trial datasets with one cost
 variable, one effect variable, and a two-level treatment group.
 
 ## Installation
 
+Install the released version from CRAN:
+
 ```{r eval=FALSE}
-# install.packages("devtools")
-devtools::install_github("ielbadisy/CEACT")
+install.packages("CEACT")
+```
+
+Or the development version from GitHub:
+
+```{r eval=FALSE}
+# install.packages("remotes")
+remotes::install_github("ielbadisy/CEACT")
 ```
 
 ```{r}
@@ -87,6 +99,44 @@ dsa_result <- dsa_icer(cost + effect ~ group, data = trial,
 dsa_result
 plot_dsa(dsa_result, metric = "INMB")
 ```
+
+## Missing Data: Multiple Imputation
+
+Trial costs and effects are often incomplete. `micea()` runs the analysis in
+each completed data set and pools the incremental cost, incremental effect, and
+INMB with Rubin's rules (Barnard-Rubin degrees of freedom). It accepts a
+`mimar_imputation` (from `mimar::impute()`), a `mids` (from `mice::mice()`), or
+a plain list of completed data frames. The pooled CEAC table works with
+`plot_ceac()`.
+
+```{r}
+set.seed(1)
+trial_mis <- trial
+trial_mis$cost[sample(nrow(trial_mis), 50)] <- NA
+
+imp <- mimar::impute(trial_mis, m = 5, seed = 1)
+res_mi <- micea(cost + effect ~ group, data = imp, ref = "control",
+                wtp_range = seq(0, 50000, 5000))
+res_mi
+plot_ceac(res_mi$ceac)
+```
+
+`miboot()` bootstraps first and imputes every bootstrap sample with a
+user-supplied function (Brand et al. 2019). The result is a
+`boot_icer`-compatible object, so `compute_nmb_ceac()`, `plot_ceplane()`, and
+`plot_ceac()` work unchanged.
+
+```{r}
+impute_fun <- function(d) mimar::impute(d, m = 2)
+res_miboot <- miboot(cost + effect ~ group, data = trial_mis, ref = "control",
+                     imputefun = impute_fun, R = 100, seed = 1)
+summary(res_miboot)
+plot_ceplane(res_miboot, k = 20000)
+```
+
+Both functions take an optional `weights` argument naming a case-weight column
+(for example matching or inverse probability weights computed within each
+completed data set).
 
 ## Trial-Based CEA Dataset
 

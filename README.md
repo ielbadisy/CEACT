@@ -1,7 +1,8 @@
 CEACT Package
 ================
 
-[![CRAN status](https://www.r-pkg.org/badges/version/CEACT)](https://CRAN.R-project.org/package=CEACT)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/CEACT)](https://CRAN.R-project.org/package=CEACT)
 
 ## Overview
 
@@ -19,16 +20,28 @@ formula-based workflow for:
 
 - cost-effectiveness planes;
 
-- one-way deterministic sensitivity analysis.
+- one-way deterministic sensitivity analysis;
+
+- missing cost and effect data, through Rubin’s rules on multiply
+  imputed data (`micea()`) or bootstrap-then-impute resampling
+  (`miboot()`).
 
 CEACT is intended for individual-level clinical-trial datasets with one
 cost variable, one effect variable, and a two-level treatment group.
 
 ## Installation
 
+Install the released version from CRAN:
+
 ``` r
-# install.packages("devtools")
-devtools::install_github("ielbadisy/CEACT")
+install.packages("CEACT")
+```
+
+Or the development version from GitHub:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("ielbadisy/CEACT")
 ```
 
 ``` r
@@ -93,7 +106,7 @@ summary(res_boot)
 plot_ceplane(res_boot, k = 20000)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
 
 ## Net Monetary Benefit and CEAC
 
@@ -110,7 +123,7 @@ head(ceac_table)
 plot_ceac(ceac_table)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
 
 ## Deterministic Sensitivity Analysis
 
@@ -131,7 +144,64 @@ dsa_result
 plot_dsa(dsa_result, metric = "INMB")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-9-1.png)<!-- -->
+
+## Missing Data: Multiple Imputation
+
+Trial costs and effects are often incomplete. `micea()` runs the
+analysis in each completed data set and pools the incremental cost,
+incremental effect, and INMB with Rubin’s rules (Barnard-Rubin degrees
+of freedom). It accepts a `mimar_imputation` (from `mimar::impute()`), a
+`mids` (from `mice::mice()`), or a plain list of completed data frames.
+The pooled CEAC table works with `plot_ceac()`.
+
+``` r
+set.seed(1)
+trial_mis <- trial
+trial_mis$cost[sample(nrow(trial_mis), 50)] <- NA
+
+imp <- mimar::impute(trial_mis, m = 5, seed = 1)
+res_mi <- micea(cost + effect ~ group, data = imp, ref = "control",
+                wtp_range = seq(0, 50000, 5000))
+res_mi
+#> Cost-effectiveness analysis pooled over 5 imputations
+#> Reference: control; treatment: treatment; n = 400
+#> 
+#>        Metric  Estimate StdError   Lower   Upper      df   FMI
+#>    Delta Cost   679.973   99.211 482.938 877.008  92.222 0.194
+#>  Delta Effect     0.054    0.011   0.033   0.075 398.000 0.000
+#>          ICER 12566.899       NA      NA      NA      NA    NA
+plot_ceac(res_mi$ceac)
+```
+
+![](man/figures/README-unnamed-chunk-10-1.png)<!-- -->
+
+`miboot()` bootstraps first and imputes every bootstrap sample with a
+user-supplied function (Brand et al. 2019). The result is a
+`boot_icer`-compatible object, so `compute_nmb_ceac()`,
+`plot_ceplane()`, and `plot_ceac()` work unchanged.
+
+``` r
+impute_fun <- function(d) mimar::impute(d, m = 2)
+res_miboot <- miboot(cost + effect ~ group, data = trial_mis, ref = "control",
+                     imputefun = impute_fun, R = 100, seed = 1)
+summary(res_miboot)
+#>                   Metric  Observed BootstrapMean StdError    Bias
+#> DeltaCost     Delta Cost   663.465       663.465   98.448   0.000
+#> DeltaEffect Delta Effect     0.057         0.057    0.010   0.000
+#> ICER                ICER 11712.379     12031.377 2558.768 318.998
+#>                                CI
+#> DeltaCost      [455.382; 854.793]
+#> DeltaEffect         [0.04; 0.081]
+#> ICER        [7544.056; 16776.453]
+plot_ceplane(res_miboot, k = 20000)
+```
+
+![](man/figures/README-unnamed-chunk-11-1.png)<!-- -->
+
+Both functions take an optional `weights` argument naming a case-weight
+column (for example matching or inverse probability weights computed
+within each completed data set).
 
 ## Trial-Based CEA Dataset
 
@@ -157,32 +227,6 @@ summary(real_res)
 #>                             CI p.value
 #> delta_cost   [-219.54; 269.54]  0.8409
 #> delta_effect     [0.005; 0.08]  0.0251
-```
-
-## Citation
-
-Use the following citation for publications that reference CEACT:
-
-``` r
-citation("CEACT")
-```
-
-> To cite package 'CEACT' in publications use:
->
->   EL BADISY I (2026). _CEACT: Cost-Effectiveness Analysis Toolkit for
->   Clinical Trials_. R package version 0.5.0,
->   <https://CRAN.R-project.org/package=CEACT>.
-
-BibTeX entry for LaTeX users:
-
-``` bibtex
-@Manual{,
-  title = {CEACT: Cost-Effectiveness Analysis Toolkit for Clinical Trials},
-  author = {Imad {EL BADISY}},
-  year = {2026},
-  note = {R package version 0.5.0},
-  url = {https://CRAN.R-project.org/package=CEACT},
-}
 ```
 
 ## Package Quality
