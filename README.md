@@ -53,6 +53,7 @@ library(CEACT)
 ``` r
 trial <- simulate_ce_trial(n = 200, seed = 123)
 head(trial)
+#> # basetable: 6 x 3
 #>       cost    effect   group
 #> 1 4495.572 0.9289862 control
 #> 2 4792.840 0.8463038 control
@@ -90,14 +91,11 @@ set.seed(42)
 res_boot <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
                       R = 500, ci.type = "perc")
 summary(res_boot)
-#>                   Metric  Observed BootstrapMean StdError    Bias
-#> DeltaCost     Delta Cost   639.489       634.728   90.584  -4.761
-#> DeltaEffect Delta Effect     0.054         0.054    0.010  -0.001
-#> ICER                ICER 11818.694     12310.932 3130.320 492.238
-#>                                CI
-#> DeltaCost      [455.471; 810.055]
-#> DeltaEffect        [0.033; 0.073]
-#> ICER        [7529.884; 18944.767]
+#> # basetable: 3 x 6
+#>         Metric  Observed BootstrapMean StdError    Bias                    CI
+#> 1   Delta Cost   639.489       634.728   90.584  -4.761    [455.471; 810.055]
+#> 2 Delta Effect     0.054         0.054    0.010  -0.001        [0.033; 0.073]
+#> 3         ICER 11818.694     12310.932 3130.320 492.238 [7529.884; 18944.767]
 ```
 
 ## Cost-Effectiveness Plane
@@ -113,6 +111,7 @@ plot_ceplane(res_boot, k = 20000)
 ``` r
 ceac_table <- compute_nmb_ceac(res_boot, wtp_range = seq(0, 50000, 5000))
 head(ceac_table)
+#> # basetable: 6 x 3
 #>     WTP       ENMB Prob_CE
 #> 1     0 -639.48888   0.000
 #> 2  5000 -368.94762   0.000
@@ -135,6 +134,7 @@ dsa_result <- dsa_icer(cost + effect ~ group, data = trial,
                        metric = "INMB",
                        k = 20000)
 dsa_result
+#> # basetable: 5 x 2
 #>   Parameter       INMB
 #> 1      0.74 -320.20684
 #> 2      0.76   79.79316
@@ -167,6 +167,7 @@ res_mi
 #> Cost-effectiveness analysis pooled over 5 imputations
 #> Reference: control; treatment: treatment; n = 400
 #> 
+#> # basetable: 3 x 7
 #>        Metric  Estimate StdError   Lower   Upper      df   FMI
 #>    Delta Cost   679.973   99.211 482.938 877.008  92.222 0.194
 #>  Delta Effect     0.054    0.011   0.033   0.075 398.000 0.000
@@ -186,14 +187,11 @@ impute_fun <- function(d) mimar::impute(d, m = 2)
 res_miboot <- miboot(cost + effect ~ group, data = trial_mis, ref = "control",
                      imputefun = impute_fun, R = 100, seed = 1)
 summary(res_miboot)
-#>                   Metric  Observed BootstrapMean StdError    Bias
-#> DeltaCost     Delta Cost   663.465       663.465   98.448   0.000
-#> DeltaEffect Delta Effect     0.057         0.057    0.010   0.000
-#> ICER                ICER 11712.379     12031.377 2558.768 318.998
-#>                                CI
-#> DeltaCost      [455.382; 854.793]
-#> DeltaEffect         [0.04; 0.081]
-#> ICER        [7544.056; 16776.453]
+#> # basetable: 3 x 6
+#>         Metric  Observed BootstrapMean StdError    Bias                    CI
+#> 1   Delta Cost   663.465       663.465   98.448   0.000    [455.382; 854.793]
+#> 2 Delta Effect     0.057         0.057    0.010   0.000         [0.04; 0.081]
+#> 3         ICER 11712.379     12031.377 2558.768 318.998 [7544.056; 16776.453]
 plot_ceplane(res_miboot, k = 20000)
 ```
 
