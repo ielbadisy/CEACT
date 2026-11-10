@@ -2,7 +2,8 @@
 
 This update adds `micea()`, cost-effectiveness analysis on multiply imputed
 data pooled with Rubin's rules, and `miboot()`, bootstrap-then-impute
-resampling. Both accept an optional case-weight column. See NEWS.md.
+resampling. Both accept an optional case-weight column. Result tables are
+now 'basetable' objects. See NEWS.md.
 
 ## Test environments
 
