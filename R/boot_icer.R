@@ -57,7 +57,7 @@ boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca",
 
   structure(
     list(
-      summary = summary_tbl,
+      summary = .as_bt(summary_tbl),
       boot_dist = bt$t,
       observed = bt$t0,
       boot = bt,

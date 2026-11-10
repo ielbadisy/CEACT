@@ -62,7 +62,7 @@ cea <- function(formula, data, ref, na.omit = TRUE) {
     formula = formula,
     ref = ref,
     call = match.call(),
-    class = c("cea", "data.frame")
+    class = c("cea", "basetable", "data.frame")
   )
 }
 

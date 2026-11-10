@@ -109,12 +109,12 @@ micea <- function(formula, data, ref, wtp_range = seq(0, 100000, 1000),
     }, numeric(1))
   )
   attr(ceac, "formula") <- formula
-  class(ceac) <- c("nmb_ceac", "data.frame")
+  class(ceac) <- c("nmb_ceac", "basetable", "data.frame")
 
   colnames(Q) <- c("DeltaCost", "DeltaEffect")
   structure(
     list(
-      summary = summary_tbl,
+      summary = .as_bt(summary_tbl),
       ceac = ceac,
       estimates = Q,
       Qbar = Qbar,

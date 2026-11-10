@@ -127,7 +127,7 @@ miboot <- function(formula, data, ref, imputefun, R = 1000, weights = NULL,
 
   structure(
     list(
-      summary = summary_tbl,
+      summary = .as_bt(summary_tbl),
       boot_dist = boot_dist,
       observed = observed,
       boot = NULL,

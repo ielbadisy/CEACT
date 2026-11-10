@@ -30,6 +30,7 @@ BugReports: https://github.com/ielbadisy/CEACT/issues
 Depends: 
     R (>= 3.5.0)
 Imports:
+    basetable (>= 1.4.2),
     ggplot2,
     boot,
     parallel

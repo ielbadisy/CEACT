@@ -51,7 +51,7 @@ dsa_icer <- function(formula, data, param, range, ref, metric = "ICER",
       deltas["delta_cost"]
   }, numeric(1))
 
-  results <- data.frame(Parameter = range, Value = values)
+  results <- .as_bt(data.frame(Parameter = range, Value = values))
   names(results)[2] <- metric
   attr(results, "metric") <- metric
   results

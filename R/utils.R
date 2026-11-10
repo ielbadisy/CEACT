@@ -136,9 +136,16 @@ simulate_ce_trial <- function(n = 200,
     )
   })
 
-  out <- do.call(rbind, arm_data)
+  out <- .as_bt(basetable::rbindfill(arm_data))
   out$cost <- pmax(out$cost, 0)
   out$effect <- pmax(out$effect, 0)
   out$group <- factor(out$group, levels = group_names)
   out
+}
+
+# Result tables are basetable objects.
+.as_bt <- function(x) {
+  x <- as.data.frame(x, stringsAsFactors = FALSE)
+  rownames(x) <- NULL
+  basetable::as_basetable(x)
 }

@@ -55,7 +55,7 @@ compute_nmb_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
     )
   )
   attr(out, "formula") <- formula
-  class(out) <- c("nmb_ceac", "data.frame")
+  class(out) <- c("nmb_ceac", "basetable", "data.frame")
   out
 }
 
