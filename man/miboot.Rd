@@ -46,7 +46,7 @@ set.}
 \value{
 An object of class \code{c("miboot", "boot_icer")} with the same
 components as \code{\link[=booticer]{booticer()}} (\code{summary}, \code{boot_dist}, \code{observed},
-\code{formula}, \code{ref}, \code{call}) plus \code{R}, \code{failed} (number of replications in
+\code{quadrants}, \code{note}, \code{formula}, \code{ref}, \code{call}) plus \code{R}, \code{failed} (number of replications in
 which imputation or estimation failed and was dropped), and \code{m} (completed
 data sets per replication).
 }
@@ -54,8 +54,12 @@ data sets per replication).
 Resamples the incomplete data within each group, imputes every bootstrap
 sample with a user-supplied imputation function, and estimates the
 incremental cost and effect on each completed sample (averaged over the
-imputations of that sample). The point estimate is the mean of the bootstrap
-estimates and intervals are percentile intervals. Bootstrapping before
+imputations of that sample). The observed estimate is the Rubin point
+estimate (mean over imputations) from the original data completed once by
+\code{imputefun}; intervals for the incremental cost and effect are percentile
+intervals. The ICER is handled as in \code{\link[=booticer]{booticer()}}: observed ratio of mean
+differences, no bootstrap mean or bias, and a percentile interval only when
+all replicates lie in the NE or in the SW quadrant. Bootstrapping before
 imputing propagates imputation uncertainty into the bootstrap distribution,
 so the result can be passed directly to \code{\link[=computenmbceac]{computenmbceac()}},
 \code{\link[=plotceplane]{plotceplane()}}, and \code{\link[=plotceac]{plotceac()}}.

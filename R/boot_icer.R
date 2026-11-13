@@ -11,9 +11,20 @@
 #' @param ci.type Confidence interval type passed to [boot::boot.ci()].
 #' @param na.omit Logical; whether to remove rows with missing values.
 #'
-#' @return An object of class `booticer` containing a summary table,
-#'   bootstrap distribution, observed estimates, formula, reference group, and
-#'   matched call.
+#' The ICER point estimate is the observed ratio of mean differences. The ICER
+#' has no bootstrap mean, standard error or bias: a mean of ratios is unstable
+#' when the incremental effect is near zero. Its interval is the percentile
+#' interval of the bootstrap ratios, reported only when all replicates lie in
+#' the NE or in the SW quadrant of the cost-effectiveness plane. Otherwise it is
+#' `NA`, a note is attached, and uncertainty should be read from the CEAC or the
+#' INMB ([computenmbceac()]). The share of replicates in each quadrant is
+#' returned in `quadrants`.
+#'
+#' @return An object of class `boot_icer` containing a summary table
+#'   (`summary`), the bootstrap distribution (`boot_dist`), the observed
+#'   estimates (`observed`), the share of replicates per quadrant
+#'   (`quadrants`), a `note` on the ICER interval (or `NULL`), the `boot`
+#'   object, formula, reference group, and matched call.
 #'
 #' @examples
 #' df <- simulatecetrial(n = 100, seed = 123)
@@ -42,24 +53,18 @@ booticer <- function(formula, data, ref, R = 1000, ci.type = "bca",
 
   ci_dc <- extract_boot_ci(bt, 1, type = ci.type)
   ci_de <- extract_boot_ci(bt, 2, type = ci.type)
-  ci_icer <- extract_boot_ci(bt, 3, type = ci.type)
+  quadrants <- ce_quadrants(bt$t[, 1], bt$t[, 2])
+  icer <- icer_interval(bt$t[, 1], bt$t[, 2], quadrants)
 
-  summary_tbl <- data.frame(
-    Metric = c("Delta Cost", "Delta Effect", "ICER"),
-    Observed = round(bt$t0, 3),
-    BootstrapMean = round(colMeans(bt$t, na.rm = TRUE), 3),
-    StdError = round(apply(bt$t, 2, stats::sd, na.rm = TRUE), 3),
-    Bias = round(colMeans(bt$t, na.rm = TRUE) - bt$t0, 3),
-    CI = c(format_interval(ci_dc), format_interval(ci_de),
-           format_interval(ci_icer)),
-    stringsAsFactors = FALSE
-  )
+  summary_tbl <- boot_summary_table(bt$t0, bt$t, ci_dc, ci_de, icer$ci)
 
   structure(
     list(
       summary = .as_bt(summary_tbl),
       boot_dist = bt$t,
       observed = bt$t0,
+      quadrants = quadrants,
+      note = icer$note,
       boot = bt,
       formula = formula,
       ref = ref,
@@ -72,5 +77,20 @@ booticer <- function(formula, data, ref, R = 1000, ci.type = "bca",
 #' @export
 summary.boot_icer <- function(object, ...) {
   if (!inherits(object, "boot_icer")) stop("Object must be of class 'boot_icer'")
+  if (!is.null(object$note)) message(object$note)
   object$summary
+}
+
+#' @export
+print.boot_icer <- function(x, ...) {
+  print(x$summary, ...)
+  cat("\nShare of replicates by quadrant:\n")
+  q <- x$quadrants
+  if (!is.null(q)) {
+    cat(paste0("  ", q$Quadrant, " (", q$Description, "): ",
+               formatC(100 * q$Share, format = "f", digits = 1), "%"),
+        sep = "\n")
+  }
+  if (!is.null(x$note)) cat("\nNote:", x$note, "\n")
+  invisible(x)
 }
