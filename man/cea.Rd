@@ -26,7 +26,7 @@ with one reference group. The incremental cost-effectiveness ratio is
 \code{ICER = (mean(cost_treatment) - mean(cost_reference)) / (mean(effect_treatment) - mean(effect_reference))}.
 }
 \examples{
-df <- simulate_ce_trial(n = 100, seed = 123)
+df <- simulatecetrial(n = 100, seed = 123)
 res <- cea(cost + effect ~ group, data = df, ref = "control")
 summary(res)
 

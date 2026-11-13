@@ -4,26 +4,26 @@
 #' that treatment is cost-effective across willingness-to-pay thresholds. For a
 #' two-arm trial, `INMB(k) = k * DeltaEffect - DeltaCost`.
 #'
-#' @param x Either a `boot_icer` object or a formula of the form
+#' @param x Either a `booticer` object or a formula of the form
 #'   `cost + effect ~ group`.
 #' @param data Data frame required when `x` is a formula.
 #' @param wtp_range Numeric vector of willingness-to-pay thresholds.
 #' @param ref Reference group label required when `x` is a formula.
 #' @param R Number of bootstrap replications used when `x` is a formula.
-#' @param ... Additional arguments passed to [boot_icer()] for formula input.
+#' @param ... Additional arguments passed to [booticer()] for formula input.
 #'
 #' @return An object of class `"nmb_ceac"` with columns `WTP`, `ENMB`, and
 #'   `Prob_CE`.
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 100, seed = 123)
-#' ceac_tbl <- compute_nmb_ceac(cost + effect ~ group, data = df,
+#' df <- simulatecetrial(n = 100, seed = 123)
+#' ceac_tbl <- computenmbceac(cost + effect ~ group, data = df,
 #'                              ref = "control", R = 200,
 #'                              wtp_range = seq(0, 50000, 5000))
 #' head(ceac_tbl)
 #'
 #' @export
-compute_nmb_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
+computenmbceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
                              ref = NULL, R = 1000, ...) {
   if (inherits(x, "boot_icer")) {
     boot_dist <- x$boot_dist
@@ -32,12 +32,12 @@ compute_nmb_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
   } else if (inherits(x, "formula")) {
     if (is.null(data)) stop("`data` must be supplied when `x` is a formula.")
     if (is.null(ref)) stop("`ref` must be supplied when `x` is a formula.")
-    boot_obj <- boot_icer(x, data = data, ref = ref, R = R, ...)
+    boot_obj <- booticer(x, data = data, ref = ref, R = R, ...)
     boot_dist <- boot_obj$boot_dist
     observed <- boot_obj$observed
     formula <- x
   } else {
-    stop("`x` must be a `boot_icer` object or formula.", call. = FALSE)
+    stop("`x` must be a `booticer` object or formula.", call. = FALSE)
   }
 
   delta_cost <- boot_dist[, 1]

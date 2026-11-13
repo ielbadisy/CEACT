@@ -3,7 +3,7 @@
 #' Plots the probability that treatment is cost-effective across
 #' willingness-to-pay thresholds.
 #'
-#' @param x A `boot_icer` object, `nmb_ceac` object, or formula of the form
+#' @param x A `booticer` object, `nmb_ceac` object, or formula of the form
 #'   `cost + effect ~ group`.
 #' @param data Data frame required when `x` is a formula.
 #' @param wtp_range Numeric vector of willingness-to-pay thresholds.
@@ -15,15 +15,15 @@
 #' @export
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 100, seed = 123)
-#' res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
-#' plot_ceac(res, wtp_range = seq(0, 50000, 5000))
-plot_ceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
+#' df <- simulatecetrial(n = 100, seed = 123)
+#' res <- booticer(cost + effect ~ group, data = df, ref = "control", R = 200)
+#' plotceac(res, wtp_range = seq(0, 50000, 5000))
+plotceac <- function(x, data = NULL, wtp_range = seq(0, 100000, 1000),
                       ref = NULL, R = 1000, ...) {
   ceac_df <- if (inherits(x, "nmb_ceac")) {
     x
   } else {
-    compute_nmb_ceac(x, data = data, wtp_range = wtp_range, ref = ref, R = R)
+    computenmbceac(x, data = data, wtp_range = wtp_range, ref = ref, R = R)
   }
 
   ggplot2::ggplot(ceac_df, ggplot2::aes(x = WTP, y = Prob_CE)) +

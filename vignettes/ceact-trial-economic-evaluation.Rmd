@@ -97,7 +97,7 @@ The observed treatment arm produces more QALYs with a small increase in mean cos
 
 ```{r bootstrap}
 set.seed(42)
-boot_res <- boot_icer(cost + qaly ~ group, data = trial, ref = "control",
+boot_res <- booticer(cost + qaly ~ group, data = trial, ref = "control",
                       R = 1000, ci.type = "perc")
 summary(boot_res)
 ```
@@ -106,7 +106,7 @@ The bootstrap distribution summarizes sampling uncertainty in $\Delta C$, $\Delt
 replications should generally be increased beyond this vignette if computation time allows [@willan2006statistical].
 
 ```{r plane, fig.cap="Cost-effectiveness plane from stratified non-parametric bootstrap replicates. The red line is the willingness-to-pay threshold."}
-plot_ceplane(boot_res, k = 20000)
+plotceplane(boot_res, k = 20000)
 ```
 
 Most simulated replicates lie in the north-east quadrant, indicating higher cost and higher effect for treatment. Replicates below the threshold line are
@@ -115,7 +115,7 @@ cost-effective at that threshold.
 # Net Monetary Benefit and CEAC
 
 ```{r ceac-table}
-ceac_tbl <- compute_nmb_ceac(
+ceac_tbl <- computenmbceac(
   boot_res,
   wtp_range = seq(0, 50000, 5000)
 )
@@ -124,7 +124,7 @@ ceac_tbl
 ```
 
 ```{r ceac-plot, fig.cap="Cost-effectiveness acceptability curve. The curve gives the bootstrap probability that treatment is cost-effective at each willingness-to-pay threshold."}
-plot_ceac(ceac_tbl)
+plotceac(ceac_tbl)
 ```
 
 The CEAC rises as the willingness-to-pay threshold increases because the treatment's positive incremental effect receives more decision value. The curve
@@ -133,7 +133,7 @@ should be interpreted as decision uncertainty, not as the expected size of the h
 # Deterministic Sensitivity Analysis
 
 ```{r dsa}
-dsa_effect <- dsa_icer(
+dsa_effect <- dsaicer(
   cost + qaly ~ group,
   data = trial,
   param = "qaly",
@@ -147,7 +147,7 @@ dsa_effect
 ```
 
 ```{r one-way-dsa-plot, fig.cap="One-way deterministic sensitivity analysis varying treatment-arm effect.", fig.height=3.6}
-plot_dsa(dsa_effect, metric = "INMB")
+plotdsa(dsa_effect, metric = "INMB")
 ```
 
 This one-way analysis shows how the incremental net monetary benefit changes as the assumed treatment-arm effect changes. Such analyses are useful for checking which assumptions drive conclusions, but they do not replace probabilistic uncertainty analysis.

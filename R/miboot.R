@@ -6,8 +6,8 @@
 #' imputations of that sample). The point estimate is the mean of the bootstrap
 #' estimates and intervals are percentile intervals. Bootstrapping before
 #' imputing propagates imputation uncertainty into the bootstrap distribution,
-#' so the result can be passed directly to [compute_nmb_ceac()],
-#' [plot_ceplane()], and [plot_ceac()].
+#' so the result can be passed directly to [computenmbceac()],
+#' [plotceplane()], and [plotceac()].
 #'
 #' @param formula A formula of the form `cost + effect ~ group`.
 #' @param data A data frame with missing values in cost, effect, or
@@ -28,7 +28,7 @@
 #'   `ncores`.
 #'
 #' @return An object of class `c("miboot", "boot_icer")` with the same
-#'   components as [boot_icer()] (`summary`, `boot_dist`, `observed`,
+#'   components as [booticer()] (`summary`, `boot_dist`, `observed`,
 #'   `formula`, `ref`, `call`) plus `R`, `failed` (number of replications in
 #'   which imputation or estimation failed and was dropped), and `m` (completed
 #'   data sets per replication).
@@ -42,7 +42,7 @@
 #' Stat Med. 2018;37(14):2252-2266.
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 60, seed = 123)
+#' df <- simulatecetrial(n = 60, seed = 123)
 #' df$cost[sample(nrow(df), 20)] <- NA
 #' hotdeck <- function(d) {
 #'   for (g in levels(d$group)) {

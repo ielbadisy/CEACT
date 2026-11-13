@@ -45,7 +45,7 @@ set.}
 }
 \value{
 An object of class \code{c("miboot", "boot_icer")} with the same
-components as \code{\link[=boot_icer]{boot_icer()}} (\code{summary}, \code{boot_dist}, \code{observed},
+components as \code{\link[=booticer]{booticer()}} (\code{summary}, \code{boot_dist}, \code{observed},
 \code{formula}, \code{ref}, \code{call}) plus \code{R}, \code{failed} (number of replications in
 which imputation or estimation failed and was dropped), and \code{m} (completed
 data sets per replication).
@@ -57,11 +57,11 @@ incremental cost and effect on each completed sample (averaged over the
 imputations of that sample). The point estimate is the mean of the bootstrap
 estimates and intervals are percentile intervals. Bootstrapping before
 imputing propagates imputation uncertainty into the bootstrap distribution,
-so the result can be passed directly to \code{\link[=compute_nmb_ceac]{compute_nmb_ceac()}},
-\code{\link[=plot_ceplane]{plot_ceplane()}}, and \code{\link[=plot_ceac]{plot_ceac()}}.
+so the result can be passed directly to \code{\link[=computenmbceac]{computenmbceac()}},
+\code{\link[=plotceplane]{plotceplane()}}, and \code{\link[=plotceac]{plotceac()}}.
 }
 \examples{
-df <- simulate_ce_trial(n = 60, seed = 123)
+df <- simulatecetrial(n = 60, seed = 123)
 df$cost[sample(nrow(df), 20)] <- NA
 hotdeck <- function(d) {
   for (g in levels(d$group)) {

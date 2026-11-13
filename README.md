@@ -51,7 +51,7 @@ library(CEACT)
 ## Simulate Trial Data
 
 ``` r
-trial <- simulate_ce_trial(n = 200, seed = 123)
+trial <- simulatecetrial(n = 200, seed = 123)
 head(trial)
 #> # basetable: 6 x 3
 #>       cost    effect   group
@@ -88,7 +88,7 @@ summary(res_cea)
 
 ``` r
 set.seed(42)
-res_boot <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
+res_boot <- booticer(cost + effect ~ group, data = trial, ref = "control",
                       R = 500, ci.type = "perc")
 summary(res_boot)
 #> # basetable: 3 x 6
@@ -101,7 +101,7 @@ summary(res_boot)
 ## Cost-Effectiveness Plane
 
 ``` r
-plot_ceplane(res_boot, k = 20000)
+plotceplane(res_boot, k = 20000)
 ```
 
 ![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
@@ -109,7 +109,7 @@ plot_ceplane(res_boot, k = 20000)
 ## Net Monetary Benefit and CEAC
 
 ``` r
-ceac_table <- compute_nmb_ceac(res_boot, wtp_range = seq(0, 50000, 5000))
+ceac_table <- computenmbceac(res_boot, wtp_range = seq(0, 50000, 5000))
 head(ceac_table)
 #> # basetable: 6 x 3
 #>     WTP       ENMB Prob_CE
@@ -119,7 +119,7 @@ head(ceac_table)
 #> 4 15000  172.13490   0.826
 #> 5 20000  442.67616   0.982
 #> 6 25000  713.21742   0.996
-plot_ceac(ceac_table)
+plotceac(ceac_table)
 ```
 
 ![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
@@ -127,7 +127,7 @@ plot_ceac(ceac_table)
 ## Deterministic Sensitivity Analysis
 
 ``` r
-dsa_result <- dsa_icer(cost + effect ~ group, data = trial,
+dsa_result <- dsaicer(cost + effect ~ group, data = trial,
                        param = "effect",
                        range = seq(0.74, 0.82, 0.02),
                        ref = "control",
@@ -141,7 +141,7 @@ dsa_result
 #> 3      0.78  479.79316
 #> 4      0.80  879.79316
 #> 5      0.82 1279.79316
-plot_dsa(dsa_result, metric = "INMB")
+plotdsa(dsa_result, metric = "INMB")
 ```
 
 ![](man/figures/README-unnamed-chunk-9-1.png)<!-- -->
@@ -153,7 +153,7 @@ analysis in each completed data set and pools the incremental cost,
 incremental effect, and INMB with Rubin’s rules (Barnard-Rubin degrees
 of freedom). It accepts a `mimar_imputation` (from `mimar::impute()`), a
 `mids` (from `mice::mice()`), or a plain list of completed data frames.
-The pooled CEAC table works with `plot_ceac()`.
+The pooled CEAC table works with `plotceac()`.
 
 ``` r
 set.seed(1)
@@ -169,18 +169,18 @@ res_mi
 #> 
 #> # basetable: 3 x 7
 #>        Metric  Estimate StdError   Lower   Upper      df   FMI
-#>    Delta Cost   679.973   99.211 482.938 877.008  92.222 0.194
+#>    Delta Cost   661.826   92.720 479.342 844.311 291.696 0.061
 #>  Delta Effect     0.054    0.011   0.033   0.075 398.000 0.000
-#>          ICER 12566.899       NA      NA      NA      NA    NA
-plot_ceac(res_mi$ceac)
+#>          ICER 12231.525       NA      NA      NA      NA    NA
+plotceac(res_mi$ceac)
 ```
 
 ![](man/figures/README-unnamed-chunk-10-1.png)<!-- -->
 
 `miboot()` bootstraps first and imputes every bootstrap sample with a
 user-supplied function (Brand et al. 2019). The result is a
-`boot_icer`-compatible object, so `compute_nmb_ceac()`,
-`plot_ceplane()`, and `plot_ceac()` work unchanged.
+`booticer`-compatible object, so `computenmbceac()`, `plotceplane()`,
+and `plotceac()` work unchanged.
 
 ``` r
 impute_fun <- function(d) mimar::impute(d, m = 2)
@@ -189,10 +189,10 @@ res_miboot <- miboot(cost + effect ~ group, data = trial_mis, ref = "control",
 summary(res_miboot)
 #> # basetable: 3 x 6
 #>         Metric  Observed BootstrapMean StdError    Bias                    CI
-#> 1   Delta Cost   663.465       663.465   98.448   0.000    [455.382; 854.793]
+#> 1   Delta Cost   659.151       659.151   98.374   0.000    [462.925; 847.301]
 #> 2 Delta Effect     0.057         0.057    0.010   0.000         [0.04; 0.081]
-#> 3         ICER 11712.379     12031.377 2558.768 318.998 [7544.056; 16776.453]
-plot_ceplane(res_miboot, k = 20000)
+#> 3         ICER 11636.232     11948.810 2523.694 312.578 [7792.656; 16950.597]
+plotceplane(res_miboot, k = 20000)
 ```
 
 ![](man/figures/README-unnamed-chunk-11-1.png)<!-- -->
