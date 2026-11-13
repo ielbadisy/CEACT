@@ -17,12 +17,23 @@ booticer(formula, data, ref, R = 1000, ci.type = "bca", na.omit = TRUE)
 
 \item{ci.type}{Confidence interval type passed to \code{\link[boot:boot.ci]{boot::boot.ci()}}.}
 
-\item{na.omit}{Logical; whether to remove rows with missing values.}
+\item{na.omit}{Logical; whether to remove rows with missing values.
+
+The ICER point estimate is the observed ratio of mean differences. The ICER
+has no bootstrap mean, standard error or bias: a mean of ratios is unstable
+when the incremental effect is near zero. Its interval is the percentile
+interval of the bootstrap ratios, reported only when all replicates lie in
+the NE or in the SW quadrant of the cost-effectiveness plane. Otherwise it is
+\code{NA}, a note is attached, and uncertainty should be read from the CEAC or the
+INMB (\code{\link[=computenmbceac]{computenmbceac()}}). The share of replicates in each quadrant is
+returned in \code{quadrants}.}
 }
 \value{
-An object of class \code{booticer} containing a summary table,
-bootstrap distribution, observed estimates, formula, reference group, and
-matched call.
+An object of class \code{boot_icer} containing a summary table
+(\code{summary}), the bootstrap distribution (\code{boot_dist}), the observed
+estimates (\code{observed}), the share of replicates per quadrant
+(\code{quadrants}), a \code{note} on the ICER interval (or \code{NULL}), the \code{boot}
+object, formula, reference group, and matched call.
 }
 \description{
 Performs non-parametric stratified bootstrap resampling for a two-arm

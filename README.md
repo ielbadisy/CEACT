@@ -92,10 +92,10 @@ res_boot <- booticer(cost + effect ~ group, data = trial, ref = "control",
                       R = 500, ci.type = "perc")
 summary(res_boot)
 #> # basetable: 3 x 6
-#>         Metric  Observed BootstrapMean StdError    Bias                    CI
-#> 1   Delta Cost   639.489       634.728   90.584  -4.761    [455.471; 810.055]
-#> 2 Delta Effect     0.054         0.054    0.010  -0.001        [0.033; 0.073]
-#> 3         ICER 11818.694     12310.932 3130.320 492.238 [7529.884; 18944.767]
+#>         Metric  Observed BootstrapMean StdError   Bias                    CI
+#> 1   Delta Cost   639.489       634.728   90.584 -4.761    [455.471; 810.055]
+#> 2 Delta Effect     0.054         0.054    0.010 -0.001        [0.033; 0.073]
+#> 3         ICER 11818.694            NA       NA     NA [7593.238; 18788.674]
 ```
 
 ## Cost-Effectiveness Plane
@@ -189,9 +189,9 @@ res_miboot <- miboot(cost + effect ~ group, data = trial_mis, ref = "control",
 summary(res_miboot)
 #> # basetable: 3 x 6
 #>         Metric  Observed BootstrapMean StdError    Bias                    CI
-#> 1   Delta Cost   659.151       659.151   98.374   0.000    [462.925; 847.301]
-#> 2 Delta Effect     0.057         0.057    0.010   0.000         [0.04; 0.081]
-#> 3         ICER 11636.232     11948.810 2523.694 312.578 [7792.656; 16950.597]
+#> 1   Delta Cost   686.372       659.151   98.374 -27.221    [462.925; 847.301]
+#> 2 Delta Effect     0.054         0.057    0.010   0.003         [0.04; 0.081]
+#> 3         ICER 12685.162            NA       NA      NA [7792.656; 16950.597]
 plotceplane(res_miboot, k = 20000)
 ```
 

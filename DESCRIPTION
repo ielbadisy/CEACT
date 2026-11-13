@@ -1,7 +1,7 @@
 Package: CEACT
 Type: Package
 Title: Cost-Effectiveness Analysis Toolkit for Clinical Trials
-Version: 0.6.1
+Version: 0.6.2
 Author: Imad El Badisy [aut, cre]
 Maintainer: Imad El Badisy <elbadisyimad@gmail.com>
 Authors@R: 
