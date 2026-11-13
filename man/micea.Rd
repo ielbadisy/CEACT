@@ -35,7 +35,7 @@ within-imputation variance treats weights as fixed.}
 An object of class \code{micea}: a list with \code{summary} (pooled estimates,
 standard errors, confidence intervals, degrees of freedom, and fraction of
 missing information), \code{ceac} (an \code{nmb_ceac} table usable with
-\code{\link[=plot_ceac]{plot_ceac()}}), \code{estimates} (per-imputation estimates), the pooled
+\code{\link[=plotceac]{plotceac()}}), \code{estimates} (per-imputation estimates), the pooled
 components \code{Qbar}, \code{Ubar}, \code{B}, and \code{Tvar}, and \code{m}, \code{n}, \code{ref},
 \code{formula}, and \code{call}.
 }
@@ -53,7 +53,7 @@ The probability that the treatment is cost-effective at threshold \code{k} is
 \code{P(INMB(k) > 0)} from the pooled t reference distribution.
 }
 \examples{
-df <- simulate_ce_trial(n = 100, seed = 123)
+df <- simulatecetrial(n = 100, seed = 123)
 set.seed(1)
 df$cost[sample(nrow(df), 40)] <- NA
 # Toy within-group hot-deck imputation, repeated five times

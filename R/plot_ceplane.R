@@ -2,7 +2,7 @@
 #'
 #' Visualizes bootstrap replicates of incremental cost and incremental effect.
 #'
-#' @param boot_icer_result A `boot_icer` object from [boot_icer()].
+#' @param boot_icer_result A `booticer` object from [booticer()].
 #' @param k Optional willingness-to-pay threshold shown as a straight line with
 #'   slope `k`.
 #' @param subtitle Optional subtitle text.
@@ -11,12 +11,12 @@
 #' @export
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 100, seed = 123)
-#' res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
-#' plot_ceplane(res, k = 20000)
-plot_ceplane <- function(boot_icer_result, k = NULL, subtitle = NULL) {
+#' df <- simulatecetrial(n = 100, seed = 123)
+#' res <- booticer(cost + effect ~ group, data = df, ref = "control", R = 200)
+#' plotceplane(res, k = 20000)
+plotceplane <- function(boot_icer_result, k = NULL, subtitle = NULL) {
   if (!inherits(boot_icer_result, "boot_icer")) {
-    stop("Input must be a result from boot_icer().", call. = FALSE)
+    stop("Input must be a result from booticer().", call. = FALSE)
   }
 
   plot_data <- data.frame(

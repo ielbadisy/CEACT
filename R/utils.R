@@ -112,9 +112,9 @@ format_pval <- function(p, digits = 4) {
 #' @export
 #'
 #' @examples
-#' trial <- simulate_ce_trial(n = 50, seed = 1)
+#' trial <- simulatecetrial(n = 50, seed = 1)
 #' head(trial)
-simulate_ce_trial <- function(n = 200,
+simulatecetrial <- function(n = 200,
                               mean_cost = c(5000, 5600),
                               sd_cost = c(900, 1000),
                               mean_effect = c(0.72, 0.78),
@@ -147,5 +147,5 @@ simulate_ce_trial <- function(n = 200,
 .as_bt <- function(x) {
   x <- as.data.frame(x, stringsAsFactors = FALSE)
   rownames(x) <- NULL
-  basetable::as_basetable(x)
+  basetable::asbasetable(x)
 }

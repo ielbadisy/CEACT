@@ -11,17 +11,17 @@
 #' @param ci.type Confidence interval type passed to [boot::boot.ci()].
 #' @param na.omit Logical; whether to remove rows with missing values.
 #'
-#' @return An object of class `boot_icer` containing a summary table,
+#' @return An object of class `booticer` containing a summary table,
 #'   bootstrap distribution, observed estimates, formula, reference group, and
 #'   matched call.
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 100, seed = 123)
-#' res <- boot_icer(cost + effect ~ group, data = df, ref = "control", R = 200)
+#' df <- simulatecetrial(n = 100, seed = 123)
+#' res <- booticer(cost + effect ~ group, data = df, ref = "control", R = 200)
 #' summary(res)
 #'
 #' @export
-boot_icer <- function(formula, data, ref, R = 1000, ci.type = "bca",
+booticer <- function(formula, data, ref, R = 1000, ci.type = "bca",
                       na.omit = TRUE) {
   ce_data <- parse_ce_formula(formula, data, ref = ref, require_group = TRUE,
                               na.omit = na.omit)

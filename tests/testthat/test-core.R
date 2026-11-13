@@ -1,5 +1,5 @@
-test_that("simulate_ce_trial creates valid two-arm data", {
-  trial <- simulate_ce_trial(n = 20, seed = 1)
+test_that("simulatecetrial creates valid two-arm data", {
+  trial <- simulatecetrial(n = 20, seed = 1)
 
   expect_s3_class(trial, "data.frame")
   expect_equal(nrow(trial), 40)
@@ -33,10 +33,10 @@ test_that("cea computes observed incremental quantities", {
   expect_equal(attr(res, "ICER"), 200)
 })
 
-test_that("boot_icer returns stratified bootstrap distribution", {
+test_that("booticer returns stratified bootstrap distribution", {
   set.seed(42)
-  trial <- simulate_ce_trial(n = 40, seed = 2)
-  res <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
+  trial <- simulatecetrial(n = 40, seed = 2)
+  res <- booticer(cost + effect ~ group, data = trial, ref = "control",
                    R = 50, ci.type = "perc")
 
   expect_s3_class(res, "boot_icer")
@@ -45,7 +45,7 @@ test_that("boot_icer returns stratified bootstrap distribution", {
   expect_equal(nrow(summary(res)), 3)
 })
 
-test_that("compute_nmb_ceac uses incremental net benefit", {
+test_that("computenmbceac uses incremental net benefit", {
   boot_obj <- list(
     boot_dist = matrix(
       c(100, 0.01, 10000,
@@ -60,26 +60,26 @@ test_that("compute_nmb_ceac uses incremental net benefit", {
   )
   class(boot_obj) <- "boot_icer"
 
-  tab <- compute_nmb_ceac(boot_obj, wtp_range = c(0, 10000, 20000))
+  tab <- computenmbceac(boot_obj, wtp_range = c(0, 10000, 20000))
 
   expect_s3_class(tab, "nmb_ceac")
   expect_equal(tab$ENMB, c(-100, 0, 100))
   expect_equal(tab$Prob_CE, c(0, 1 / 3, 2 / 3))
 })
 
-test_that("dsa_icer and plot functions return expected objects", {
+test_that("dsaicer and plot functions return expected objects", {
   set.seed(42)
-  trial <- simulate_ce_trial(n = 40, seed = 3)
-  boot_res <- boot_icer(cost + effect ~ group, data = trial, ref = "control",
+  trial <- simulatecetrial(n = 40, seed = 3)
+  boot_res <- booticer(cost + effect ~ group, data = trial, ref = "control",
                         R = 30, ci.type = "perc")
-  dsa <- dsa_icer(cost + effect ~ group, data = trial, param = "effect",
+  dsa <- dsaicer(cost + effect ~ group, data = trial, param = "effect",
                   range = c(0.75, 0.80), ref = "control", metric = "INMB",
                   k = 20000)
 
   expect_equal(names(dsa), c("Parameter", "INMB"))
-  expect_s3_class(plot_ceplane(boot_res, k = 20000), "ggplot")
-  expect_s3_class(plot_ceac(boot_res, wtp_range = c(0, 10000)), "ggplot")
-  expect_s3_class(plot_dsa(dsa, metric = "INMB"), "ggplot")
+  expect_s3_class(plotceplane(boot_res, k = 20000), "ggplot")
+  expect_s3_class(plotceac(boot_res, wtp_range = c(0, 10000)), "ggplot")
+  expect_s3_class(plotdsa(dsa, metric = "INMB"), "ggplot")
   expect_warning(
     expect_s3_class(plot_tornado(dsa, metric = "INMB"), "ggplot"),
     "deprecated"

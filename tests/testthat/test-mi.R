@@ -1,5 +1,5 @@
 make_incomplete <- function(seed = 1) {
-  df <- simulate_ce_trial(n = 80, seed = seed)
+  df <- simulatecetrial(n = 80, seed = seed)
   set.seed(seed)
   df$cost[sample(nrow(df), 40)] <- NA
   df$effect[sample(nrow(df), 30)] <- NA
@@ -19,7 +19,7 @@ hotdeck <- function(d) {
 }
 
 test_that("micea reduces to the complete-data analysis when imputations agree", {
-  df <- simulate_ce_trial(n = 60, seed = 2)
+  df <- simulatecetrial(n = 60, seed = 2)
   res <- micea(cost + effect ~ group, data = list(df, df, df), ref = "control",
                wtp_range = c(0, 20000))
   obs <- cea(cost + effect ~ group, data = df, ref = "control")
@@ -68,9 +68,9 @@ test_that("micea accepts mids and weights", {
   res <- micea(cost + effect ~ group, data = imp, ref = "control")
   expect_s3_class(res, "micea")
   expect_equal(res$m, 5)
-  expect_s3_class(plot_ceac(res$ceac), "ggplot")
+  expect_s3_class(plotceac(res$ceac), "ggplot")
 
-  df2 <- simulate_ce_trial(n = 50, seed = 4)
+  df2 <- simulatecetrial(n = 50, seed = 4)
   df2$w <- 1
   unw <- micea(cost + effect ~ group, data = list(df2, df2), ref = "control")
   wtd <- micea(cost + effect ~ group, data = list(df2, df2), ref = "control",
@@ -85,7 +85,7 @@ test_that("micea accepts mids and weights", {
 })
 
 test_that("micea input checks", {
-  df <- simulate_ce_trial(n = 20, seed = 1)
+  df <- simulatecetrial(n = 20, seed = 1)
   expect_error(micea(cost + effect ~ group, data = list(df), ref = "control"),
                "at least two")
   bad <- df
@@ -97,7 +97,7 @@ test_that("micea input checks", {
 })
 
 test_that("miboot works with complete data and with imputation", {
-  df <- simulate_ce_trial(n = 50, seed = 5)
+  df <- simulatecetrial(n = 50, seed = 5)
   res <- miboot(cost + effect ~ group, data = df, ref = "control",
                 imputefun = identity, R = 200, seed = 1)
   expect_s3_class(res, "boot_icer")
@@ -113,8 +113,8 @@ test_that("miboot works with complete data and with imputation", {
                imputefun = hotdeck, R = 40, seed = 7)
   expect_equal(r1$boot_dist, r2$boot_dist)
   expect_equal(nrow(r1$boot_dist), 40)
-  expect_s3_class(compute_nmb_ceac(r1, wtp_range = c(0, 20000)), "nmb_ceac")
-  expect_s3_class(plot_ceplane(r1, k = 20000), "ggplot")
+  expect_s3_class(computenmbceac(r1, wtp_range = c(0, 20000)), "nmb_ceac")
+  expect_s3_class(plotceplane(r1, k = 20000), "ggplot")
 
   multi <- function(d) lapply(1:3, function(i) hotdeck(d))
   r3 <- miboot(cost + effect ~ group, data = inc, ref = "control",

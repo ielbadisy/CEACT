@@ -26,7 +26,7 @@
 #' @return An object of class `micea`: a list with `summary` (pooled estimates,
 #'   standard errors, confidence intervals, degrees of freedom, and fraction of
 #'   missing information), `ceac` (an `nmb_ceac` table usable with
-#'   [plot_ceac()]), `estimates` (per-imputation estimates), the pooled
+#'   [plotceac()]), `estimates` (per-imputation estimates), the pooled
 #'   components `Qbar`, `Ubar`, `B`, and `Tvar`, and `m`, `n`, `ref`,
 #'   `formula`, and `call`.
 #'
@@ -37,7 +37,7 @@
 #' imputation. Biometrika. 1999;86(4):948-955.
 #'
 #' @examples
-#' df <- simulate_ce_trial(n = 100, seed = 123)
+#' df <- simulatecetrial(n = 100, seed = 123)
 #' set.seed(1)
 #' df$cost[sample(nrow(df), 40)] <- NA
 #' # Toy within-group hot-deck imputation, repeated five times

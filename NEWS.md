@@ -1,15 +1,14 @@
-# CEACT 0.6.0
+# CEACT 0.6.1
 
-* Result tables are now `basetable` objects (still data frames): the
-  `summary` tables of `boot_icer()`, `miboot()` and `micea()`, `cea()`,
-  `compute_nmb_ceac()`, `dsa_icer()` and `simulate_ce_trial()`. `basetable`
-  added to `Imports`.
-* New `micea()`: cost-effectiveness analysis on multiply imputed data
-  (`mimar_imputation`, `mids`, or a list of completed data frames), pooled with
-  Rubin's rules and Barnard-Rubin degrees of freedom, including INMB and a
-  CEAC table at each willingness-to-pay threshold.
-* New `miboot()`: bootstrap-then-impute resampling with a user-supplied
-  imputation function; returns a `boot_icer`-compatible object for
-  `compute_nmb_ceac()`, `plot_ceplane()`, and `plot_ceac()`.
-* Both functions accept an optional case-weight column (for example matching
-  or inverse probability weights computed within each completed data set).
+Exported functions are renamed to glued lowercase (no underscores). The old names remain as deprecated wrappers for one release (see `?"CEACT-deprecated"`). The `boot_icer` and `nmb_ceac` class names are unchanged. `plot_tornado()` was already a deprecated alias and now points to `plotdsa()`. Requires `basetable (>= 1.4.5)`.
+
+| Old | New |
+|---|---|
+| `boot_icer()` | `booticer()` |
+| `compute_nmb_ceac()` | `computenmbceac()` |
+| `dsa_icer()` | `dsaicer()` |
+| `plot_ceac()` | `plotceac()` |
+| `plot_ceplane()` | `plotceplane()` |
+| `plot_dsa()` | `plotdsa()` |
+| `simulate_ce_trial()` | `simulatecetrial()` |
+

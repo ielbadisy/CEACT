@@ -7,7 +7,7 @@
 plot_tornado(df, metric = "ICER")
 }
 \arguments{
-\item{df}{A data frame from \code{\link[=dsa_icer]{dsa_icer()}}.}
+\item{df}{A data frame from \code{\link[=dsaicer]{dsaicer()}}.}
 
 \item{metric}{Character string. Either \code{"ICER"} or \code{"INMB"}.}
 }
@@ -15,7 +15,7 @@ plot_tornado(df, metric = "ICER")
 A \code{ggplot} object.
 }
 \description{
-\code{plot_tornado()} is kept for backward compatibility. Use \code{plot_dsa()}
+\code{plot_tornado()} is kept for backward compatibility. Use \code{plotdsa()}
 instead. The plot produced by CEACT is a one-way deterministic sensitivity
 curve, not a conventional tornado plot.
 }
