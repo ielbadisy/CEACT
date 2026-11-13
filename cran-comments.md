@@ -1,9 +1,16 @@
-## Update submission (0.5.0 -> 0.6.0)
+## Update submission (0.5.0 -> 0.6.2)
 
 This update adds `micea()`, cost-effectiveness analysis on multiply imputed
 data pooled with Rubin's rules, and `miboot()`, bootstrap-then-impute
 resampling. Both accept an optional case-weight column. Result tables are
-now 'basetable' objects. See NEWS.md.
+now 'basetable' objects (requires basetable >= 1.4.5).
+
+Exported functions are renamed to glued lowercase (for example
+`boot_icer()` becomes `booticer()`). The old names remain as deprecated
+wrappers for one release.
+
+`booticer()` and `miboot()` now report the observed ICER, with a percentile
+interval only when all bootstrap replicates fall in one quadrant. See NEWS.md.
 
 ## Test environments
 
